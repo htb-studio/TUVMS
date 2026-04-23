@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build client
+        run: npm run build -w client
+
+      - name: Build server
+        run: npm run build -w server
+
+  deploy_skeleton:
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: echo "Edit this job to deploy client to Vercel and server to your host."

@@ -6,8 +6,25 @@ import AuthGate from '@/components/AuthGate'
 import { api } from '@/lib/api'
 import Link from 'next/link'
 import { useMemo } from 'react'
+import { LucideAward, LucideCalendar, LucideChevronLeft, LucideClock, LucideFileCheck, LucideTrophy } from 'lucide-react'
 
 export default function DashboardPage() {
+  const stats = useQuery({
+    queryKey: ['my-stats'],
+    queryFn: async () => {
+      const res = await api.get<{
+        ok: boolean
+        data: {
+          eventsCount: number
+          attendanceCount: number
+          badgesCount: number
+          totalHours: number
+        }
+      }>('/api/me/stats')
+      return res.data.data
+    }
+  })
+
   const me = useQuery({
     queryKey: ['me'],
     queryFn: async () => {
@@ -38,82 +55,140 @@ export default function DashboardPage() {
   return (
     <AuthGate title="الرجاء تسجيل الدخول">
       <AppShell title="لوحة التحكم">
-        <div className="overflow-hidden rounded-3xl border border-black/10 bg-white shadow-[0_18px_50px_-40px_rgba(0,0,0,0.35)]">
-          <div className="border-b border-black/5 bg-zinc-50/70 p-6">
-            <div className="text-lg font-black">مرحبًا{me.data?.full_name ? `، ${me.data.full_name}` : ''}</div>
-            <div className="mt-2 text-sm text-zinc-600">نقطة انطلاق سريعة لكل ما تحتاجه في TUVMS.</div>
+        <div className="space-y-6 pb-20">
+          {/* Welcome Card - Modern Gradient */}
+          <div className="relative overflow-hidden rounded-[2.5rem] border border-black/10 bg-black p-8 text-white shadow-xl shadow-black/10">
+            <div className="relative z-10">
+              <div className="text-3xl font-black mb-1">
+                مرحبًا{me.data?.full_name ? `، ${me.data.full_name.split(' ')[0]}` : ''} 👋
+              </div>
+              <p className="text-white/60 text-sm font-medium leading-relaxed">
+                سعادتنا بوجودك تزداد مع كل مساهمة تطوعية تقوم بها.
+                <br />
+                أنت جزء مهم من رحلة العطاء في جامعة الطائف.
+              </p>
+            </div>
+            
+            {/* Background Decoration */}
+            <div className="absolute -right-10 -bottom-10 h-40 w-40 bg-white/5 rounded-full blur-3xl" />
+            <div className="absolute -left-10 -top-10 h-32 w-32 bg-amber-500/10 rounded-full blur-2xl" />
           </div>
-          <div className="p-6">
-            {me.isLoading ? (
-              <div className="mb-6 overflow-hidden rounded-3xl border border-black/10 bg-white p-6">
-                <div className="animate-pulse">
-                  <div className="h-4 w-40 rounded bg-zinc-200" />
-                  <div className="mt-3 h-3 w-64 rounded bg-zinc-200" />
-                  <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                    <div className="h-24 rounded-3xl bg-zinc-100" />
-                    <div className="h-24 rounded-3xl bg-zinc-100" />
+          
+          {/* Modern Stats Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-[2rem] border border-black/10 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-10 w-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                  <LucideClock size={20} />
+                </div>
+                <span className="text-[11px] font-black text-zinc-400 uppercase tracking-wider">ساعات التطوع</span>
+              </div>
+              <div className="text-3xl font-black">{stats.data?.totalHours ?? 0}</div>
+              <div className="mt-1 text-xs text-zinc-500 font-medium">ساعة مسجلة</div>
+            </div>
+
+            <div className="rounded-[2rem] border border-black/10 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-10 w-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <LucideTrophy size={20} />
+                </div>
+                <span className="text-[11px] font-black text-zinc-400 uppercase tracking-wider">الأوسمة</span>
+              </div>
+              <div className="text-3xl font-black">{stats.data?.badgesCount ?? 0}</div>
+              <div className="mt-1 text-xs text-zinc-500 font-medium">وسام استحقاق</div>
+            </div>
+
+            <div className="rounded-[2rem] border border-black/10 bg-white p-6 shadow-sm col-span-2 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="h-10 w-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <LucideCalendar size={20} />
                   </div>
+                  <span className="text-[11px] font-black text-zinc-400 uppercase tracking-wider">الفعاليات</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-black">{stats.data?.eventsCount ?? 0}</span>
+                  <span className="text-xs text-zinc-500 font-medium">تم التسجيل فيها</span>
                 </div>
               </div>
-            ) : me.isError ? (
-              <div className="mb-6 rounded-3xl border border-red-200 bg-red-50 p-6">
-                <div className="text-sm font-extrabold text-red-800">تعذر تحميل بيانات الملف</div>
-                <div className="mt-2 text-sm text-red-700">حاول تحديث الصفحة أو تسجيل الخروج ثم الدخول مرة أخرى.</div>
+              <div className="text-right">
+                <div className="text-2xl font-black text-zinc-200">#01</div>
+                <div className="text-[9px] font-bold text-zinc-400 uppercase">الترتيب حالياً</div>
               </div>
-            ) : null}
+            </div>
+          </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+          {/* New Grid Quick Actions */}
+          <div className="space-y-4 pt-2">
+            <h3 className="text-lg font-black px-2 flex items-center gap-2">
+              <span className="h-6 w-1 bg-amber-500 rounded-full" />
+              الوصول السريع
+            </h3>
+            
+            <div className="grid grid-cols-2 gap-4">
               <Link
                 href="/events"
-                className="rounded-3xl border border-black/10 bg-white p-6 hover:bg-black/[0.02] transition"
+                className="group relative overflow-hidden rounded-[2rem] border border-black/10 bg-white p-5 shadow-sm hover:border-amber-500/30 transition-all duration-300"
               >
-                <div className="text-sm font-extrabold">تصفح الفرص التطوعية</div>
-                <div className="mt-2 text-sm text-zinc-600">ابحث وسجّل واحصل على QR.</div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-all duration-300 mb-4">
+                  <LucideCalendar size={24} />
+                </div>
+                <div className="text-sm font-black">الفرص المتاحة</div>
+                <div className="mt-1 text-[10px] text-zinc-500">سجل في الفعاليات الجديدة</div>
+              </Link>
+
+              <Link
+                href="/dashboard/wallet"
+                className="group relative overflow-hidden rounded-[2rem] border border-black/10 bg-white p-5 shadow-sm hover:border-emerald-500/30 transition-all duration-300"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300 mb-4">
+                  <LucideAward size={24} />
+                </div>
+                <div className="text-sm font-black">المحفظة الرقمية</div>
+                <div className="mt-1 text-[10px] text-zinc-500">شهاداتك وأوسمتك</div>
+              </Link>
+
+              <Link
+                href="/dashboard/card"
+                className="group relative overflow-hidden rounded-[2rem] border border-black/10 bg-white p-5 shadow-sm hover:border-blue-500/30 transition-all duration-300"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300 mb-4">
+                  <LucideFileCheck size={24} />
+                </div>
+                <div className="text-sm font-black">البطاقة الذكية</div>
+                <div className="mt-1 text-[10px] text-zinc-500">إثبات الهوية التطوعية</div>
               </Link>
 
               {role === 'organizer' || role === 'admin' ? (
                 <Link
                   href="/organizer"
-                  className="rounded-3xl border border-black/10 bg-white p-6 hover:bg-black/[0.02] transition"
+                  className="group relative overflow-hidden rounded-[2rem] border border-black/10 bg-zinc-900 p-5 shadow-sm hover:bg-black transition-all duration-300"
                 >
-                  <div className="text-sm font-extrabold">لوحة المنظم</div>
-                  <div className="mt-2 text-sm text-zinc-600">إنشاء فعاليات ومتابعة الحضور والتقارير.</div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white mb-4">
+                    <LucideChevronLeft size={24} />
+                  </div>
+                  <div className="text-sm font-black text-white">إدارة النادي</div>
+                  <div className="mt-1 text-[10px] text-white/40">صلاحيات المنظمين</div>
                 </Link>
               ) : (
-                <Link
-                  href="/dashboard/card"
-                  className="rounded-3xl border border-black/10 bg-white p-6 hover:bg-black/[0.02] transition"
-                >
-                  <div className="text-sm font-extrabold">البطاقة الرقمية</div>
-                  <div className="mt-2 text-sm text-zinc-600">تحقق سريع بالـ QR وحالة العضوية.</div>
-                </Link>
+                <div className="group relative overflow-hidden rounded-[2rem] border border-black/5 bg-zinc-50/50 p-5 opacity-60">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-200 text-zinc-400 mb-4">
+                    <LucideTrophy size={24} />
+                  </div>
+                  <div className="text-sm font-black text-zinc-400">نظام الرتب</div>
+                  <div className="mt-1 text-[10px] text-zinc-400">قريباً في التحديث</div>
+                </div>
               )}
             </div>
+          </div>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <Link
-                href="/dashboard/wallet"
-                className="rounded-3xl border border-black/10 bg-white p-6 hover:bg-black/[0.02] transition"
-              >
-                <div className="text-sm font-extrabold">المحفظة</div>
-                <div className="mt-2 text-sm text-zinc-600">شهاداتك وأوسمتك في مكان واحد.</div>
-              </Link>
-
-              <Link
-                href="/dashboard/card"
-                className="rounded-3xl border border-black/10 bg-white p-6 hover:bg-black/[0.02] transition"
-              >
-                <div className="text-sm font-extrabold">البطاقة الرقمية</div>
-                <div className="mt-2 text-sm text-zinc-600">وجه وقفى + تحقق سريع بالـ QR.</div>
-              </Link>
+          <div className="mt-12 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-100 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+              TUVMS — TAIF UNIVERSITY
             </div>
-
-            <div className="mt-10 text-center text-sm text-zinc-500">
-              صنع بقلب من متطوعين نادي التطوع بـ جامعة الطائف —{' '}
-              <a href="https://www.tu.edu.sa" target="_blank" rel="noreferrer" className="font-bold text-[#8B6914] hover:underline">
-                جامعة الطائف
-              </a>
-            </div>
+            <p className="mt-4 text-[10px] text-zinc-400 font-medium">
+              نعمل معاً لبناء مجتمع تطوعي واعي ومبادر
+            </p>
           </div>
         </div>
       </AppShell>

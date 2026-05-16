@@ -89,7 +89,7 @@ export default function AuthPage() {
 
       const issues = passwordIssues(password, emailNorm)
       if (issues.length > 0) {
-        setStatus({ type: 'error', msg: issues[0] })
+        setStatus({ type: 'error', msg: issues.join(' | ') })
         return
       }
 
@@ -108,8 +108,26 @@ export default function AuthPage() {
         return
       }
 
+      const universityIdNorm = universityId.trim()
+      if (!/^\d{8}$/.test(universityIdNorm)) {
+        setStatus({ type: 'error', msg: 'الرقم الجامعي يجب أن يكون 8 أرقام بالضبط' })
+        return
+      }
+
       if (!phone.trim()) {
         setStatus({ type: 'error', msg: 'الرجاء إدخال رقم الجوال' })
+        return
+      }
+
+      const phoneNorm = phone.trim()
+      if (!phoneNorm.startsWith('+966') || phoneNorm.length !== 13 || !/^\+966\d{9}$/.test(phoneNorm)) {
+        setStatus({ type: 'error', msg: 'رقم الجوال يجب أن يبدأ بـ +966 ويكون 13 خانة بالضبط' })
+        return
+      }
+
+      const nationalIdNorm = nationalId.trim()
+      if (nationalIdNorm && !/^\d{10}$/.test(nationalIdNorm)) {
+        setStatus({ type: 'error', msg: 'رقم الهوية يجب أن يكون 10 أرقام بالضبط' })
         return
       }
 
@@ -118,7 +136,7 @@ export default function AuthPage() {
         return
       }
 
-      const { error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email: emailNorm,
         password,
         options: {
@@ -126,10 +144,10 @@ export default function AuthPage() {
           data: {
             full_name: fullName,
             gender,
-            university_id: universityId,
-            national_id: nationalId || null,
+            university_id: universityIdNorm,
+            national_id: nationalIdNorm || null,
             birth_date: birthDate || null,
-            phone,
+            phone: phoneNorm,
             college,
             department: department || null,
             academic_level: academicLevel || null,
@@ -142,6 +160,25 @@ export default function AuthPage() {
         }
       })
       if (error) throw error
+
+      if (signUpData?.user) {
+        const { error: profileError } = await supabase.from('users').upsert({
+          id: signUpData.user.id,
+          email: emailNorm,
+          full_name: fullName,
+          gender,
+          university_id: universityIdNorm,
+          national_id: nationalIdNorm || null,
+          birth_date: birthDate || null,
+          phone: phoneNorm,
+          college,
+          department: department || null,
+          academic_level: academicLevel || null,
+          skills: { tech: skillsTech, daily: skillsDaily, admin: skillsAdmin },
+          role: 'volunteer'
+        }, { onConflict: 'id' })
+        if (profileError) console.error('Profile upsert error:', profileError)
+      }
 
       setStatus({ type: 'ok', msg: 'تم إنشاء الحساب. تحقق من بريدك الجامعي لتفعيل الحساب ثم سجّل الدخول.' })
       setMode('signin')

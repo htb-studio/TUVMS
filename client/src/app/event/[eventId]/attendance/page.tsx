@@ -131,15 +131,29 @@ export default function EventAttendancePrepPage() {
       if (!video) throw new Error('Missing video element')
 
       setRunning(true)
-      await reader.decodeFromVideoDevice(undefined, video, async (result, _err, controls) => {
+      // Try to get back camera with autofocus
+      const constraints: MediaStreamConstraints = {
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      }
+
+      await reader.decodeFromConstraints(constraints, video, async (result, _err, controls) => {
         if (!result) return
         if (cooldown) return
 
         setCooldown(true)
-        setTimeout(() => setCooldown(false), 1500)
+        setTimeout(() => setCooldown(false), 1000)
 
         const raw = result.getText()
         await handleRaw(raw)
+        
+        // Simple vibration for feedback
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+          navigator.vibrate(50)
+        }
 
         if (!controls) return
       })

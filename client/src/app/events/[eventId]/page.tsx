@@ -6,66 +6,49 @@ import Link from 'next/link'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import { api } from '@/lib/api'
+import { LucideAward, LucideCalendar, LucideClock, LucideMapPin, LucideUsers, LucideArrowRight, LucideCheckCircle2, LucideQrCode, LucideAlertCircle } from 'lucide-react'
 
-type EventRow = {
-  id: string
-  title: string
-  description: string | null
-  capacity: number | null
-  start_time: string | null
-  end_time: string | null
-  created_at: string
-}
-
-type RegRow = { event_id: string; created_at: string }
-
-type Availability = {
-  event_id: string
-  capacity: number
-  registeredCount: number
-  isFull: boolean
-  remaining: number | null
-}
+const DetailsSkeleton = () => (
+  <div className="animate-pulse space-y-6">
+    <div className="h-64 rounded-[2.5rem] bg-zinc-100" />
+    <div className="space-y-3">
+      <div className="h-8 w-1/3 bg-zinc-100 rounded" />
+      <div className="h-4 w-full bg-zinc-50 rounded" />
+      <div className="h-4 w-5/6 bg-zinc-50 rounded" />
+    </div>
+  </div>
+)
 
 export default function EventDetailsPage() {
   const params = useParams<{ eventId: string }>()
   const eventId = params.eventId
   const qc = useQueryClient()
-  
-  const regMutationKey = ['register', eventId]
 
   const ev = useQuery({
-    queryKey: ['event', eventId],
+    queryKey: ['event-v2', eventId],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: EventRow[] }>('/api/events')
-      const list = res.data.data
-      const found = list.find((x) => String(x.id) === String(eventId))
-      if (!found) throw new Error('Not found')
-      return found as EventRow
-    },
-    refetchOnWindowFocus: true,
-    refetchInterval: 5000
+      const res = await api.get<{ ok: boolean; data: any[] }>('/api/events')
+      const found = res.data.data.find((x) => String(x.id) === String(eventId))
+      if (!found) throw new Error('Event not found')
+      return found
+    }
   })
 
   const regs = useQuery({
-    queryKey: ['my-registrations'],
+    queryKey: ['my-registrations-v2'],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: RegRow[] }>('/api/me/registrations')
+      const res = await api.get<{ ok: boolean; data: any[] }>('/api/me/registrations')
       return res.data.data
-    },
-    refetchOnWindowFocus: true,
-    refetchInterval: 5000
+    }
   })
 
   const availability = useQuery({
-    queryKey: ['event-availability', eventId],
+    queryKey: ['event-availability-v2', eventId],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: Availability }>(`/api/events/${eventId}/availability`)
+      const res = await api.get<{ ok: boolean; data: any }>(`/api/events/${eventId}/availability`)
       return res.data.data
     },
-    enabled: !!eventId,
-    refetchOnWindowFocus: true,
-    refetchInterval: 5000
+    enabled: !!eventId
   })
 
   const registered = (regs.data ?? []).some((r) => String(r.event_id) === String(eventId))
@@ -73,135 +56,156 @@ export default function EventDetailsPage() {
 
   const register = useMutation({
     mutationFn: async () => {
-      const res = await api.post<{ ok: boolean; data?: any; error?: string; details?: string }>(`/api/events/${eventId}/register`)
+      const res = await api.post(`/api/events/${eventId}/register`)
       return res.data
     },
-    onSuccess: async () => {
-      qc.setQueryData<RegRow[]>(['my-registrations'], (prev) => {
-        const list = prev ?? []
-        if (list.some((r) => String(r.event_id) === String(eventId))) return list
-        return [{ event_id: String(eventId), created_at: new Date().toISOString() }, ...list]
-      })
-      await qc.invalidateQueries({ queryKey: ['my-registrations'] })
-      await qc.invalidateQueries({ queryKey: ['events'] })
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['my-registrations-v2'] })
+      qc.invalidateQueries({ queryKey: ['event-availability-v2', eventId] })
     }
   })
 
+  if (ev.isLoading) return <AuthGate title="جاري التحميل..."><AppShell title="جاري التحميل..."><DetailsSkeleton /></AppShell></AuthGate>
+
+  const event = ev.data
+
   return (
     <AuthGate title="الرجاء تسجيل الدخول">
-      <AppShell title="تفاصيل الفعالية">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <Link href="/events" className="text-sm text-zinc-600 hover:text-black">
-            ← رجوع
+      <AppShell title="تفاصيل الفرصة">
+        <div className="space-y-6 pb-24">
+          
+          <Link href="/events" className="inline-flex items-center gap-2 text-sm font-black text-zinc-400 hover:text-black transition-colors px-2">
+            <LucideArrowRight size={18} className="rotate-180" />
+            العودة للفعاليات
           </Link>
-          {registered && (
-            <Link
-              href={`/events/${eventId}/qr`}
-              className="h-11 rounded-2xl border border-black/10 bg-white px-5 text-sm font-semibold hover:bg-black/[0.03] flex items-center"
-            >
-              عرض QR
-            </Link>
-          )}
-        </div>
 
-        <div className="mt-6 overflow-hidden rounded-3xl border border-black/10 bg-white shadow-[0_18px_50px_-40px_rgba(0,0,0,0.35)]">
-          <div className="border-b border-black/5 bg-zinc-50/70 p-6">
-            {ev.isLoading && (
-              <div>
-                <div className="h-8 w-2/3 rounded bg-zinc-100" />
-                <div className="mt-4 h-4 w-full rounded bg-zinc-100" />
-                <div className="mt-2 h-4 w-5/6 rounded bg-zinc-100" />
-              </div>
-            )}
-
-            {ev.isError && (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">تعذر تحميل الفعالية.</div>
-            )}
-
-            {ev.data && (
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <div className="text-3xl font-black tracking-tight">{ev.data.title}</div>
-                  <div className="mt-2 text-sm text-zinc-600">{ev.data.description ?? 'بدون وصف'}</div>
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-black p-8 sm:p-12 text-white shadow-2xl shadow-black/20">
+            <div className="relative z-10">
+              <div className="flex flex-wrap items-center gap-3 mb-6">
+                <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${registered ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-[#C9A84C]/20 text-[#C9A84C] border border-[#C9A84C]/30'}`}>
+                  {registered ? 'تم الانضمام بنجاح' : 'فرصة متاحة الآن'}
                 </div>
+                <div className="px-4 py-1.5 rounded-full bg-white/5 text-white/40 text-[10px] font-black border border-white/5">
+                  #{String(eventId).slice(0, 8)}
+                </div>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl font-black mb-6 leading-tight">
+                {event?.title}
+              </h1>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="flex items-center gap-4 group">
+                  <div className="h-12 w-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-amber-500/20 transition-colors border border-white/5">
+                    <LucideCalendar className="text-amber-500" size={24} />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold text-white/40 uppercase">التاريخ</div>
+                    <div className="text-sm font-black">{event?.start_time ? new Date(event.start_time).toLocaleDateString('ar-SA', { day: 'numeric', month: 'long' }) : 'قريباً'}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 group">
+                  <div className="h-12 w-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors border border-white/5">
+                    <LucideClock className="text-blue-500" size={24} />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold text-white/40 uppercase">الوقت</div>
+                    <div className="text-sm font-black">{event?.start_time ? new Date(event.start_time).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 group">
+                  <div className="h-12 w-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors border border-white/5">
+                    <LucideUsers className="text-emerald-500" size={24} />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold text-white/40 uppercase">السعة المتبقية</div>
+                    <div className="text-sm font-black">
+                      {availability.data ? (availability.data.capacity - availability.data.registeredCount) : '...'} متطوع
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="absolute -right-20 -top-20 h-64 w-64 bg-[#C9A84C]/10 rounded-full blur-3xl" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="rounded-[2rem] border border-black/5 bg-white p-8 shadow-sm">
+                <h3 className="text-lg font-black mb-6 flex items-center gap-2">
+                  <span className="h-6 w-1 bg-[#C9A84C] rounded-full" />
+                  عن هذه الفرصة
+                </h3>
+                <div className="text-zinc-600 leading-relaxed text-base whitespace-pre-wrap">
+                  {event?.description || 'لا يوجد وصف تفصيلي لهذه الفعالية حالياً.'}
+                </div>
+              </div>
+
+              {registered && event?.certificate_text && (
+                <div className="rounded-[2rem] border border-emerald-100 bg-emerald-50/30 p-8">
+                  <h3 className="text-lg font-black text-emerald-900 mb-4 flex items-center gap-2">
+                    <LucideAward size={22} className="text-emerald-600" />
+                    تعليمات المتطوعين
+                  </h3>
+                  <div className="text-emerald-800/80 text-sm leading-relaxed">
+                    {event.certificate_text}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-6">
+              <div className="sticky top-6 rounded-[2rem] border border-black/10 bg-white p-8 shadow-xl shadow-black/5">
+                <h3 className="text-lg font-black mb-2">حالة التسجيل</h3>
+                <p className="text-xs text-zinc-400 mb-8 font-medium">سجل انضمامك الآن لتكون جزءاً من هذا العطاء.</p>
+
                 {registered ? (
-                  <div className="inline-flex rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-bold text-emerald-800">مسجل</div>
-                ) : (
-                  <div className="inline-flex rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-900">غير مسجل</div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="p-6">
-            {ev.data && (
-              <>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                    <div className="text-xs text-zinc-500">السعة</div>
-                    <div className="mt-1 text-lg font-extrabold">{ev.data.capacity ?? 0}</div>
-                  </div>
-                  <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                    <div className="text-xs text-zinc-500">البداية</div>
-                    <div className="mt-1 font-mono text-xs text-zinc-700">{ev.data.start_time ?? '—'}</div>
-                  </div>
-                  <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                    <div className="text-xs text-zinc-500">النهاية</div>
-                    <div className="mt-1 font-mono text-xs text-zinc-700">{ev.data.end_time ?? '—'}</div>
-                  </div>
-                </div>
-
-                {availability.data && (
-                  <div className="mt-4 rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                    <div className="text-xs text-zinc-500">المسجلين</div>
-                    <div className="mt-1 text-lg font-extrabold">
-                      {availability.data.registeredCount}
-                      <span className="text-sm font-semibold text-zinc-500"> / {availability.data.capacity}</span>
-                    </div>
-                    {isFull && !registered && (
-                      <div className="mt-2 inline-flex rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-900">
-                        العدد مكتمل
+                  <div className="space-y-4">
+                    <div className="flex flex-col items-center justify-center py-6 px-4 rounded-3xl bg-emerald-50 border border-emerald-100 text-center">
+                      <div className="h-12 w-12 rounded-full bg-emerald-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20">
+                        <LucideCheckCircle2 size={24} />
                       </div>
-                    )}
+                      <div className="text-emerald-900 font-black text-sm">أنت مسجل بالفعل!</div>
+                      <p className="text-[10px] text-emerald-600/70 mt-1">يمكنك إبراز الـ QR للمنظم عند الحضور</p>
+                    </div>
+                    
+                    <Link
+                      href={`/events/${eventId}/qr`}
+                      className="w-full h-14 rounded-2xl bg-black text-white font-black text-sm flex items-center justify-center gap-2 hover:bg-zinc-800 transition-all active:scale-95"
+                    >
+                      <LucideQrCode size={18} />
+                      إظهار بطاقة الحضور
+                    </Link>
                   </div>
+                ) : isFull ? (
+                  <div className="flex flex-col items-center justify-center py-8 px-4 rounded-3xl bg-zinc-50 border border-zinc-100 text-center">
+                    <LucideAlertCircle size={32} className="text-zinc-300 mb-3" />
+                    <div className="text-zinc-500 font-black text-sm">عذراً، المقاعد مكتملة</div>
+                    <p className="text-[10px] text-zinc-400 mt-1">تابعنا للفرص القادمة</p>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => register.mutate()}
+                    disabled={register.isPending}
+                    className="w-full h-16 rounded-2xl bg-[#C9A84C] text-black font-black text-base flex items-center justify-center gap-2 hover:bg-[#8B6914] hover:text-white transition-all shadow-lg shadow-amber-500/20 active:scale-95 disabled:opacity-50"
+                  >
+                    {register.isPending ? 'جاري تسجيلك...' : 'تأكيد الانضمام الآن'}
+                  </button>
                 )}
 
-                <div className="mt-8 rounded-3xl border border-black/10 bg-white p-6">
-                  <div className="text-sm font-extrabold">التسجيل</div>
-                  <div className="mt-2 text-sm text-zinc-600">بعد التسجيل ستحصل على QR خاص بك. التحضير يتم فقط عبر المنظم.</div>
-
-                  {register.isError && (
-                    <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                      {(() => {
-                        const anyErr: any = register.error
-                        const msg = anyErr?.response?.data?.error ?? anyErr?.message
-                        const details = anyErr?.response?.data?.details
-                        return details ? `${msg}: ${details}` : msg ?? 'تعذر إكمال التسجيل'
-                      })()}
-                    </div>
-                  )}
-
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <button
-                      className="h-11 rounded-2xl bg-black px-5 text-sm font-semibold text-white hover:bg-black/90 disabled:opacity-50"
-                      disabled={registered || isFull || register.isPending}
-                      onClick={() => register.mutate()}
-                    >
-                      {registered ? 'تم التسجيل' : isFull ? 'العدد مكتمل' : register.isPending ? 'جاري التسجيل…' : 'سجل الآن'}
-                    </button>
-                    {registered && (
-                      <Link
-                        href={`/events/${eventId}/qr`}
-                        className="h-11 rounded-2xl border border-black/10 bg-white px-5 text-sm font-semibold hover:bg-black/[0.03] flex items-center"
-                      >
-                        عرض QR
-                      </Link>
-                    )}
+                <div className="mt-8 pt-8 border-t border-black/5">
+                  <div className="flex items-center gap-3 text-zinc-400">
+                    <LucideMapPin size={18} />
+                    <span className="text-[10px] font-bold">مقر الفعالية: داخل الحرم الجامعي</span>
                   </div>
                 </div>
-              </>
-            )}
+              </div>
+            </div>
           </div>
+
         </div>
       </AppShell>
     </AuthGate>

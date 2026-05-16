@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import AppShell from '@/components/AppShell'
@@ -7,7 +8,7 @@ import AuthGate from '@/components/AuthGate'
 import RoleGate from '@/components/RoleGate'
 import { api } from '@/lib/api'
 import Link from 'next/link'
-import { useState } from 'react'
+import { LucideAward, LucidePlus } from 'lucide-react'
 
 type AdminUserProfile = {
   id: string
@@ -24,6 +25,19 @@ type AdminUserProfile = {
   academic_level?: string | null
   birth_date?: string | null
   membership_status?: 'active' | 'suspended' | 'revoked' | null
+}
+
+type Badge = {
+  id: string
+  name: string
+  icon: string | null
+  description: string | null
+}
+
+type UserBadge = {
+  id: string
+  badge: Badge
+  created_at: string
 }
 
 type AttendanceRow = {
@@ -89,6 +103,48 @@ function AdminUserBody() {
     }
   })
 
+  const userBadges = useQuery({
+    queryKey: ['user-badges', userId],
+    queryFn: async () => {
+      const res = await api.get<{ ok: boolean; data: UserBadge[] }>(`/api/users/${userId}/badges`)
+      return res.data.data
+    },
+    enabled: !!userId
+  })
+
+  const allBadges = useQuery({
+    queryKey: ['admin-badges'],
+    queryFn: async () => {
+      const res = await api.get<{ ok: boolean; data: Badge[] }>(`/api/admin/badges`)
+      return res.data.data
+    },
+    enabled: !!userId
+  })
+
+  const awardBadge = useMutation({
+    mutationFn: async (badgeId: string) => {
+      const res = await api.post(`/api/admin/users/${userId}/award-badge`, { badgeId })
+      return res.data
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['user-badges', userId] })
+      alert('تم منح الوسام بنجاح!')
+    }
+  })
+
+  const createBadge = useMutation({
+    mutationFn: async (badge: Partial<Badge>) => {
+      const res = await api.post(`/api/admin/badges`, badge)
+      return res.data
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-badges'] })
+      alert('تم إنشاء الوسام بنجاح!')
+      setNewBadgeName('')
+      setNewBadgeDesc('')
+    }
+  })
+
   const resetPassword = useMutation({
     mutationFn: async () => {
       const res = await api.post<{ ok: boolean; data: { email: string; action_link: string | null } }>(
@@ -100,6 +156,12 @@ function AdminUserBody() {
       setResetLink(data.action_link ?? '')
     }
   })
+
+  const [newBadgeName, setNewBadgeName] = useState('')
+  const [newBadgeIcon, setNewBadgeIcon] = useState('🏆')
+  const [newBadgeDesc, setNewBadgeDesc] = useState('')
+
+  const [showBadgeModal, setShowBadgeModal] = useState(false)
 
   return (
     <AppShell title="ملف العضو">
@@ -152,6 +214,34 @@ function AdminUserBody() {
                       <div className="text-xs text-zinc-500">الحالة</div>
                       <div className="mt-1 text-sm font-bold">{user.data.membership_status ?? '—'}</div>
                     </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 rounded-3xl border border-black/10 bg-white p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-extrabold">الأوسمة والجوائز</div>
+                    <button
+                      onClick={() => setShowBadgeModal(true)}
+                      className="flex items-center gap-1 text-xs font-bold text-black underline"
+                    >
+                      <LucidePlus size={14} /> إدارة الأوسمة
+                    </button>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {userBadges.data?.length === 0 && (
+                      <div className="text-xs text-zinc-500 italic">لا توجد أوسمة بعد.</div>
+                    )}
+                    {userBadges.data?.map((ub) => (
+                      <div
+                        key={ub.id}
+                        className="flex items-center gap-2 rounded-2xl border border-black/10 bg-zinc-50 px-3 py-2 shadow-sm"
+                        title={ub.badge.description ?? ''}
+                      >
+                        <span className="text-lg">{ub.badge.icon ?? '🏆'}</span>
+                        <div className="text-xs font-bold">{ub.badge.name}</div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -268,6 +358,68 @@ function AdminUserBody() {
           )}
         </div>
       </div>
+      {showBadgeModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-black/5 pb-4">
+              <h3 className="text-lg font-black">إدارة الأوسمة</h3>
+              <button onClick={() => setShowBadgeModal(false)} className="text-sm font-bold text-zinc-400">إغلاق</button>
+            </div>
+
+            <div className="mt-6">
+              <div className="text-xs font-bold text-zinc-600">منح وسام موجود</div>
+              <div className="mt-3 grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
+                {allBadges.data?.map(b => (
+                  <button
+                    key={b.id}
+                    onClick={() => awardBadge.mutate(b.id)}
+                    className="flex flex-col items-center gap-2 rounded-2xl border border-black/10 p-3 hover:bg-zinc-50 text-center"
+                  >
+                    <span className="text-2xl">{b.icon ?? '🏆'}</span>
+                    <span className="text-xs font-bold">{b.name}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-black/5">
+                <div className="text-xs font-bold text-zinc-600">إنشاء وسام جديد</div>
+                <div className="mt-3 space-y-2">
+                  <div className="flex gap-2">
+                    <input 
+                      className="h-10 w-16 rounded-xl border border-black/10 text-center" 
+                      placeholder="Icon" 
+                      value={newBadgeIcon}
+                      onChange={(e) => setNewBadgeIcon(e.target.value)}
+                    />
+                    <input 
+                      className="h-10 flex-1 rounded-xl border border-black/10 px-3 text-sm" 
+                      placeholder="اسم الوسام..." 
+                      value={newBadgeName}
+                      onChange={(e) => setNewBadgeName(e.target.value)}
+                    />
+                  </div>
+                  <input 
+                    className="h-10 w-full rounded-xl border border-black/10 px-3 text-sm" 
+                    placeholder="وصف قصير..." 
+                    value={newBadgeDesc}
+                    onChange={(e) => setNewBadgeDesc(e.target.value)}
+                  />
+                  <button
+                    onClick={() => {
+                      if (!newBadgeName) return alert('يرجى إدخال الاسم')
+                      createBadge.mutate({ name: newBadgeName, icon: newBadgeIcon, description: newBadgeDesc })
+                    }}
+                    disabled={createBadge.isPending}
+                    className="h-10 w-full rounded-xl bg-black text-white text-xs font-bold disabled:opacity-50"
+                  >
+                    {createBadge.isPending ? 'جاري الإنشاء...' : 'إنشاء الوسام'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   )
 }

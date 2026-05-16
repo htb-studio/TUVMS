@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import AppShell from '@/components/AppShell'
@@ -8,6 +8,7 @@ import AuthGate from '@/components/AuthGate'
 import RoleGate from '@/components/RoleGate'
 import { api } from '@/lib/api'
 import Link from 'next/link'
+import { LucideDownload, LucideSearch, LucideUserCheck, LucideUserX, LucideUsers } from 'lucide-react'
 
 type ReportRow = {
   id: string
@@ -19,6 +20,8 @@ type ReportRow = {
   created_at: string
   user_email: string | null
   user_full_name: string | null
+  user_phone?: string | null
+  status?: 'registered' | 'checked_in' | 'checked_out'
 }
 
 async function fetchReport(eventId: string) {
@@ -29,7 +32,7 @@ async function fetchReport(eventId: string) {
 }
 
 function toCsv(rows: ReportRow[]) {
-  const header = ['#', 'البريد', 'الاسم', 'الدخول', 'الانصراف', 'وقت إنشاء السجل', 'user_id']
+  const header = ['#', 'البريد', 'الاسم', 'الجوال', 'الحالة', 'الدخول', 'الانصراف', 'وقت إنشاء السجل', 'user_id']
   const escape = (v: any) => {
     const s = v == null ? '' : String(v)
     return `"${s.replaceAll('"', '""')}"`
@@ -57,6 +60,8 @@ function toCsv(rows: ReportRow[]) {
         idx + 1,
         r.user_email,
         r.user_full_name,
+        r.user_phone,
+        r.status,
         fmt(r.check_in),
         fmt(r.check_out),
         fmt(r.created_at),
@@ -73,6 +78,8 @@ function toCsv(rows: ReportRow[]) {
 export default function OrganizerEventAttendanceReportPage() {
   const params = useParams<{ eventId: string }>()
   const eventId = params.eventId
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterStatus, setFilterStatus] = useState<'all' | 'checked_in' | 'checked_out' | 'not_checked'>('all')
 
   const q = useQuery({
     queryKey: ['org-att-report', eventId],
@@ -80,117 +87,194 @@ export default function OrganizerEventAttendanceReportPage() {
     refetchOnWindowFocus: true,
     refetchInterval: 5000
   })
+
+  const filteredRows = useMemo(() => {
+    if (!q.data) return []
+    let rows = q.data.rows
+
+    // Filter by status
+    if (filterStatus === 'checked_in') {
+      rows = rows.filter(r => r.check_in && !r.check_out)
+    } else if (filterStatus === 'checked_out') {
+      rows = rows.filter(r => r.check_out)
+    } else if (filterStatus === 'not_checked') {
+      rows = rows.filter(r => !r.check_in)
+    }
+
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const s = searchTerm.toLowerCase()
+      rows = rows.filter(r => 
+        (r.user_full_name ?? '').toLowerCase().includes(s) ||
+        (r.user_email ?? '').toLowerCase().includes(s) ||
+        (r.user_phone ?? '').toLowerCase().includes(s)
+      )
+    }
+
+    return rows
+  }, [q.data, filterStatus, searchTerm])
+
   const csv = useMemo(() => (q.data ? toCsv(q.data.rows) : ''), [q.data])
 
   return (
     <AuthGate title="الرجاء تسجيل الدخول">
       <RoleGate allow={['organizer', 'admin']}>
-        <AppShell title="تقرير الحضور">
+        <AppShell title="إدارة الحضور">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Link href={`/organizer/events/${eventId}`} className="text-sm text-zinc-600 hover:text-black">
-                ← رجوع
+              <Link href={`/organizer/events/${eventId}`} className="text-sm font-bold text-zinc-600 hover:text-black">
+                ← العودة للفعالية
               </Link>
-              <div className="text-xs text-zinc-500">تقرير الحضور</div>
             </div>
 
             {q.data && (
-              <button
-                className="h-11 rounded-2xl bg-black px-5 text-sm font-semibold text-white hover:bg-black/90"
-                onClick={async () => {
-                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `attendance-${eventId}.csv`
-                  document.body.appendChild(a)
-                  a.click()
-                  a.remove()
-                  URL.revokeObjectURL(url)
-                }}
-              >
-                تصدير CSV
-              </button>
+              <div className="flex gap-2">
+                <button
+                  className="flex items-center gap-2 h-11 rounded-2xl bg-black px-5 text-sm font-semibold text-white hover:bg-black/90 transition-all active:scale-95"
+                  onClick={async () => {
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `attendance-${eventId}.csv`
+                    document.body.appendChild(a)
+                    a.click()
+                    a.remove()
+                    URL.revokeObjectURL(url)
+                  }}
+                >
+                  <LucideDownload size={18} />
+                  تصدير الكشف (CSV)
+                </button>
+              </div>
             )}
           </div>
 
-          <div className="mt-6 overflow-hidden rounded-3xl border border-black/10 bg-white shadow-[0_18px_50px_-40px_rgba(0,0,0,0.35)]">
+          {/* Stats Section */}
+          <div className="mt-6 grid gap-4 sm:grid-cols-4">
+            <div className="rounded-3xl border border-black/10 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3 text-zinc-500">
+                <LucideUsers size={20} />
+                <span className="text-xs font-bold uppercase tracking-wider">إجمالي المسجلين</span>
+              </div>
+              <div className="mt-2 text-3xl font-black">{q.data?.stats.total ?? 0}</div>
+            </div>
+            <div className="rounded-3xl border border-black/10 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3 text-emerald-600">
+                <LucideUserCheck size={20} />
+                <span className="text-xs font-bold uppercase tracking-wider">تم التحضير</span>
+              </div>
+              <div className="mt-2 text-3xl font-black">{q.data?.stats.checked_in ?? 0}</div>
+            </div>
+            <div className="rounded-3xl border border-black/10 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3 text-blue-600">
+                <LucideUserCheck size={20} />
+                <span className="text-xs font-bold uppercase tracking-wider">تم الانصراف</span>
+              </div>
+              <div className="mt-2 text-3xl font-black">{q.data?.stats.checked_out ?? 0}</div>
+            </div>
+            <div className="rounded-3xl border border-black/10 bg-white p-6 shadow-sm">
+              <div className="flex items-center gap-3 text-red-500">
+                <LucideUserX size={20} />
+                <span className="text-xs font-bold uppercase tracking-wider">لم يحضروا</span>
+              </div>
+              <div className="mt-2 text-3xl font-black">{(q.data?.stats.total ?? 0) - (q.data?.stats.checked_in ?? 0)}</div>
+            </div>
+          </div>
+
+          <div className="mt-6 overflow-hidden rounded-[2.5rem] border border-black/10 bg-white shadow-sm">
             <div className="border-b border-black/5 bg-zinc-50/70 p-6">
-              <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <div className="text-2xl font-black tracking-tight">تقرير الحضور</div>
-                  <div className="mt-2 text-sm text-zinc-600">يعرض سجلات الدخول/الانصراف لهذه الفعالية فقط.</div>
+                  <div className="text-xl font-black tracking-tight">قائمة الحضور والتفاصيل</div>
+                  <div className="mt-1 text-sm text-zinc-500">البحث والفلترة اللحظية للمتطوعين.</div>
                 </div>
-                {q.data?.event?.title && (
-                  <div className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-xs font-semibold text-zinc-700">{q.data.event.title}</div>
-                )}
+                
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="relative">
+                    <LucideSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                    <input 
+                      type="text"
+                      placeholder="بحث بالاسم أو البريد..."
+                      className="h-10 w-64 rounded-xl border border-black/10 bg-white pr-9 pl-4 text-xs outline-none focus:border-black/30"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <select 
+                    className="h-10 rounded-xl border border-black/10 bg-white px-3 text-xs font-bold outline-none"
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value as any)}
+                  >
+                    <option value="all">الكل</option>
+                    <option value="checked_in">تم التحضير فقط</option>
+                    <option value="checked_out">تم الانصراف</option>
+                    <option value="not_checked">لم يحضروا بعد</option>
+                  </select>
+                </div>
               </div>
             </div>
 
             <div className="p-6">
               {q.isLoading && (
-                <>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                        <div className="h-3 w-20 rounded bg-zinc-200" />
-                        <div className="mt-3 h-8 w-16 rounded bg-zinc-200" />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-6 h-72 rounded-3xl border border-black/10 bg-zinc-50" />
-                </>
+                <div className="space-y-4">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="h-16 w-full animate-pulse rounded-2xl bg-zinc-100" />
+                  ))}
+                </div>
               )}
 
               {q.isError && (
-                <div className="mt-2 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                  تعذر تحميل التقرير. تأكد أنك منظّم هذه الفعالية أو Admin.
+                <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center text-red-800">
+                  <div className="text-sm font-bold">تعذر تحميل بيانات الحضور</div>
                 </div>
               )}
 
               {q.data && (
-                <>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                      <div className="text-xs text-zinc-500">الإجمالي</div>
-                      <div className="mt-1 text-2xl font-extrabold">{q.data.stats.total}</div>
-                    </div>
-                    <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                      <div className="text-xs text-zinc-500">تم تسجيل دخول</div>
-                      <div className="mt-1 text-2xl font-extrabold">{q.data.stats.checked_in}</div>
-                    </div>
-                    <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                      <div className="text-xs text-zinc-500">تم تسجيل انصراف</div>
-                      <div className="mt-1 text-2xl font-extrabold">{q.data.stats.checked_out}</div>
-                    </div>
-                  </div>
-
-                  <div className="mt-8 overflow-hidden rounded-3xl border border-black/10">
-                    <div className="grid grid-cols-[1.2fr_1fr_1fr] gap-3 border-b border-black/10 bg-zinc-50 px-4 py-3 text-xs font-bold text-zinc-600">
-                      <div>المتطوع</div>
-                      <div>الدخول</div>
-                      <div>الانصراف</div>
-                    </div>
-
-                    {q.data.rows.length === 0 && (
-                      <div className="bg-white px-4 py-10 text-center">
-                        <div className="text-lg font-extrabold">لا يوجد حضور بعد</div>
-                        <div className="mt-2 text-sm text-zinc-600">عند بدء المسح في صفحة التحضير ستظهر السجلات هنا.</div>
-                      </div>
-                    )}
-
-                    {q.data.rows.map((r) => (
-                      <div key={r.id} className="grid grid-cols-[1.2fr_1fr_1fr] gap-3 border-b border-black/5 bg-white px-4 py-3 text-sm">
-                        <div>
-                          <div className="font-semibold">{r.user_full_name ?? '—'}</div>
-                          <div className="text-xs text-zinc-500">{r.user_email ?? ''}</div>
-                        </div>
-                        <div className="font-mono text-xs text-zinc-700">{r.check_in ?? '—'}</div>
-                        <div className="font-mono text-xs text-zinc-700">{r.check_out ?? '—'}</div>
-                      </div>
-                    ))}
-                  </div>
-                </>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b border-black/5 text-right text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                        <th className="pb-4 pr-2">المتطوع</th>
+                        <th className="pb-4 px-4 text-center">الحالة</th>
+                        <th className="pb-4 px-4 text-center">وقت الدخول</th>
+                        <th className="pb-4 px-4 text-center">وقت الانصراف</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-black/5">
+                      {filteredRows.length === 0 && (
+                        <tr>
+                          <td colSpan={4} className="py-12 text-center">
+                            <div className="text-zinc-400 text-sm font-bold italic">لا توجد نتائج تطابق البحث...</div>
+                          </td>
+                        </tr>
+                      )}
+                      {filteredRows.map((r) => (
+                        <tr key={r.user_id} className="group hover:bg-zinc-50/50 transition-colors">
+                          <td className="py-4 pr-2">
+                            <div className="font-black text-sm">{r.user_full_name ?? '—'}</div>
+                            <div className="text-[10px] font-bold text-zinc-400 uppercase">{r.user_email ?? ''}</div>
+                          </td>
+                          <td className="py-4 px-4 text-center">
+                            {r.status === 'checked_out' ? (
+                              <span className="inline-flex rounded-lg bg-blue-50 px-2 py-1 text-[10px] font-black text-blue-700 uppercase tracking-tight">مكتمل</span>
+                            ) : r.status === 'checked_in' ? (
+                              <span className="inline-flex rounded-lg bg-emerald-50 px-2 py-1 text-[10px] font-black text-emerald-700 uppercase tracking-tight">حاضر</span>
+                            ) : (
+                              <span className="inline-flex rounded-lg bg-zinc-100 px-2 py-1 text-[10px] font-black text-zinc-400 uppercase tracking-tight">مسجل</span>
+                            )}
+                          </td>
+                          <td className="py-4 px-4 text-center font-mono text-[11px] text-zinc-600">
+                            {r.check_in ? new Date(r.check_in).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                          </td>
+                          <td className="py-4 px-4 text-center font-mono text-[11px] text-zinc-600">
+                            {r.check_out ? new Date(r.check_out).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           </div>

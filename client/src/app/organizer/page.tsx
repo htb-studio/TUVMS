@@ -26,6 +26,7 @@ export default function OrganizerPage() {
   const [capacity, setCapacity] = useState<number>(0)
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
+  const [type, setType] = useState('general')
   const [createError, setCreateError] = useState<string>('')
 
   const events = useQuery({
@@ -61,6 +62,7 @@ export default function OrganizerPage() {
           title,
           description: description || null,
           capacity,
+          type: type.toLowerCase() || 'general',
           start_time: startIso,
           end_time: endIso,
           date: dateOnly,
@@ -144,6 +146,19 @@ export default function OrganizerPage() {
                       type="number"
                       min={0}
                     />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-600 mb-2">النوع</label>
+                    <select
+                      className="h-11 w-full rounded-2xl border border-black/10 bg-white px-4 text-sm outline-none focus:border-black/30"
+                      value={type}
+                      onChange={(e) => setType(e.target.value)}
+                    >
+                      <option value="general">عام</option>
+                      <option value="educational">تعليمي</option>
+                      <option value="social">اجتماعي</option>
+                      <option value="other">أخرى</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-zinc-600 mb-2">البداية</label>

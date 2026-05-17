@@ -17,6 +17,7 @@ type AdminEvent = {
   date: string | null
   start_time: string | null
   end_time: string | null
+  type: string
   admin_tag?: string | null
   certificate_text?: string | null
   is_visible?: boolean
@@ -136,14 +137,29 @@ export default function GodAdminEventSettingsPage() {
               </h3>
               
               <div className="space-y-6">
-                <div>
-                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-2 px-1">وسم الفعالية (Admin Tag)</label>
-                  <input
-                    className="w-full h-14 rounded-2xl border border-black/5 bg-zinc-50 px-4 text-sm font-bold focus:bg-white focus:border-[#C9A84C]/50 transition-all outline-none"
-                    placeholder="مثال: فعالية كبرى، حضور إلزامي..."
-                    defaultValue={event.admin_tag || ''}
-                    onBlur={(e) => update.mutate({ admin_tag: e.target.value })}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-2 px-1">نوع الفعالية</label>
+                    <select
+                      className="w-full h-14 rounded-2xl border border-black/5 bg-zinc-50 px-4 text-sm font-bold focus:bg-white focus:border-[#C9A84C]/50 transition-all outline-none"
+                      value={event.type || 'general'}
+                      onChange={(e) => update.mutate({ type: e.target.value })}
+                    >
+                      <option value="general">عام (General)</option>
+                      <option value="educational">تعليمي (Educational)</option>
+                      <option value="social">اجتماعي (Social)</option>
+                      <option value="other">أخرى (Other)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-2 px-1">وسم الفعالية (Admin Tag)</label>
+                    <input
+                      className="w-full h-14 rounded-2xl border border-black/5 bg-zinc-50 px-4 text-sm font-bold focus:bg-white focus:border-[#C9A84C]/50 transition-all outline-none"
+                      placeholder="مثال: فعالية كبرى، حضور إلزامي..."
+                      defaultValue={event.admin_tag || ''}
+                      onBlur={(e) => update.mutate({ admin_tag: e.target.value })}
+                    />
+                  </div>
                 </div>
 
                 <div>

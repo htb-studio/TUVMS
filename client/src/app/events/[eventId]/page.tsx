@@ -83,12 +83,14 @@ export default function EventDetailsPage() {
       const { data: evData } = await supabase.from('events').select('*').eq('id', eventId).single()
       if (evData?.is_closed) throw new Error('Registration closed')
 
+      const token = Math.random().toString(36).substring(2)
       const { data, error } = await supabase
         .from('registrations')
         .insert({ 
           user_id: session.user.id, 
           event_id: eventId, 
-          token: Math.random().toString(36).substring(2) 
+          token,
+          qr_payload: { user_id: session.user.id, event_id: eventId, token }
         })
         .select()
         .single()
@@ -99,6 +101,10 @@ export default function EventDetailsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['my-registrations-v2'] })
       qc.invalidateQueries({ queryKey: ['event-availability-v2', eventId] })
+      alert('تم الانضمام بنجاح!')
+    },
+    onError: (err: any) => {
+      alert('فشل الانضمام: ' + (err.message || 'حدث خطأ غير متوقع'))
     }
   })
 

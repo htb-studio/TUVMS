@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { api } from '@/lib/api'
+import { supabase } from '@/lib/supabaseClient'
 
 export default function RoleGate({
   allow,
@@ -13,8 +13,15 @@ export default function RoleGate({
   const q = useQuery({
     queryKey: ['me'],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: { role: string } }>('/api/me')
-      return res.data.data
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+      const { data, error } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', session.user.id)
+        .single()
+      if (error) throw error
+      return data
     }
   })
 

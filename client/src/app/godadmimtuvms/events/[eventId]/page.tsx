@@ -8,7 +8,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import RoleGate from '@/components/RoleGate'
-import { api } from '@/lib/api'
+import { supabase } from '@/lib/supabaseClient'
 
 type AdminEvent = {
   id: string
@@ -31,20 +31,31 @@ export default function GodAdminEventSettingsPage() {
   const q = useQuery({
     queryKey: ['admin-event', eventId],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: AdminEvent }>(`/api/admin/events/${eventId}`)
-      return res.data.data
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('id', eventId)
+        .single()
+      if (error) throw error
+      return data as AdminEvent
     },
     refetchInterval: 5000
   })
 
   const update = useMutation({
     mutationFn: async (patch: Partial<AdminEvent>) => {
-      const res = await api.post<{ ok: boolean; data: AdminEvent }>(`/api/admin/events/${eventId}/settings`, patch)
-      return res.data.data
+      const { data, error } = await supabase
+        .from('events')
+        .update(patch)
+        .eq('id', eventId)
+        .select()
+        .single()
+      if (error) throw error
+      return data as AdminEvent
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-event', eventId] })
-      qc.invalidateQueries({ queryKey: ['events'] })
+      qc.invalidateQueries({ queryKey: ['events-v2'] })
     }
   })
 

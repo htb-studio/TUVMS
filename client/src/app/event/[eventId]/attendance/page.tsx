@@ -6,7 +6,7 @@ import { BrowserMultiFormatReader } from '@zxing/browser'
 import AuthGate from '@/components/AuthGate'
 import RoleGate from '@/components/RoleGate'
 import AppShell from '@/components/AppShell'
-import { api } from '@/lib/api'
+import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
 
 type ScanResult =
@@ -63,36 +63,79 @@ export default function EventAttendancePrepPage() {
       parsed = null
     }
 
-    if (!parsed || typeof parsed !== 'object') {
-      const r: ScanResult = { ok: false, error: 'QR غير صالح (يجب أن يكون JSON).', at }
+    if (!parsed || typeof parsed !== 'object' || !parsed.user_id || !parsed.token) {
+      const r: ScanResult = { ok: false, error: 'QR غير صالح أو ينقصه بيانات.', at }
       setLast(r)
       setLog((x) => [r, ...x].slice(0, 20))
       return
     }
 
     try {
-      const res = await api.post<{ ok: boolean; action?: 'check_in' | 'check_out'; error?: string }>(
-        `/api/events/${eventId}/attendance/scan?token=${encodeURIComponent(token)}`,
-        { qrPayload: parsed }
-      )
+      // 1. Verify organizer token for this event
+      const { data: event, error: evError } = await supabase
+        .from('events')
+        .select('qr_token')
+        .eq('id', eventId)
+        .single()
+      
+      if (evError || !event || event.qr_token !== token) {
+        throw new Error('رمز التحضير الخاص بالمنظم غير صالح لهذه الفعالية.')
+      }
 
-      if (!res.data.ok || !res.data.action) {
-        const r: ScanResult = { ok: false, error: res.data.error ?? 'فشل التحقق من الحضور.', at }
-        setLast(r)
-        setLog((x) => [r, ...x].slice(0, 20))
-        return
+      // 2. Verify user registration token
+      const { data: reg, error: regError } = await supabase
+        .from('registrations')
+        .select('id, token')
+        .eq('user_id', parsed.user_id)
+        .eq('event_id', eventId)
+        .single()
+      
+      if (regError || !reg || reg.token !== parsed.token) {
+        throw new Error('رمز المتطوع غير صالح أو غير مسجل في هذه الفعالية.')
+      }
+
+      // 3. Check for existing attendance
+      const { data: att, error: attError } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('user_id', parsed.user_id)
+        .eq('event_id', eventId)
+        .single()
+      
+      let action: 'check_in' | 'check_out'
+      if (attError && attError.code === 'PGRST116') {
+        // No attendance yet -> Check-in
+        const { error: insError } = await supabase
+          .from('attendance')
+          .insert({
+            user_id: parsed.user_id,
+            event_id: eventId,
+            check_in: at
+          })
+        if (insError) throw insError
+        action = 'check_in'
+      } else if (att && att.check_in && !att.check_out) {
+        // Already checked in -> Check-out
+        const { error: updError } = await supabase
+          .from('attendance')
+          .update({ check_out: at })
+          .eq('id', att.id)
+        if (updError) throw updError
+        action = 'check_out'
+      } else {
+        throw new Error('تم تسجيل الحضور والانصراف مسبقاً لهذا المتطوع.')
       }
 
       const r: ScanResult = {
         ok: true,
-        action: res.data.action,
+        action,
         at,
         userId: String(parsed.user_id ?? '')
       }
       setLast(r)
       setLog((x) => [r, ...x].slice(0, 20))
     } catch (e: any) {
-      const msg = e?.response?.data?.error ?? e?.message ?? 'حدث خطأ غير متوقع'
+      const msg = e.message ?? 'حدث خطأ غير متوقع'
       const r: ScanResult = { ok: false, error: String(msg), at }
       setLast(r)
       setLog((x) => [r, ...x].slice(0, 20))

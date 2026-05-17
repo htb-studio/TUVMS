@@ -6,9 +6,7 @@ import Link from 'next/link'
 import { QRCodeSVG } from 'qrcode.react'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
-import { api } from '@/lib/api'
-
-type QRRes = { ok: boolean; data: { payload: any } }
+import { supabase } from '@/lib/supabaseClient'
 
 export default function EventQrPage() {
   const params = useParams<{ eventId: string }>()
@@ -17,8 +15,18 @@ export default function EventQrPage() {
   const q = useQuery({
     queryKey: ['my-qr', eventId],
     queryFn: async () => {
-      const res = await api.get<QRRes>(`/api/events/${eventId}/my-qr`)
-      return res.data.data
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+
+      const { data, error } = await supabase
+        .from('registrations')
+        .select('token, user_id, event_id')
+        .eq('user_id', session.user.id)
+        .eq('event_id', eventId)
+        .single()
+      
+      if (error) throw error
+      return { payload: data }
     }
   })
 

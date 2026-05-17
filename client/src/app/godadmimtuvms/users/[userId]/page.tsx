@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import RoleGate from '@/components/RoleGate'
-import { api } from '@/lib/api'
+import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
 import { LucideAward, LucidePlus } from 'lucide-react'
 
@@ -69,13 +69,18 @@ function AdminUserBody() {
   const params = useParams<{ userId: string }>()
   const userId = params.userId
   const qc = useQueryClient()
-  const [resetLink, setResetLink] = useState<string>('')
+  const [resetSent, setResetSent] = useState(false)
 
   const user = useQuery({
     queryKey: ['admin-user', userId],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: AdminUserProfile }>(`/api/admin/users/${userId}`)
-      return res.data.data
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single()
+      if (error) throw error
+      return data as AdminUserProfile
     },
     enabled: !!userId,
     refetchOnWindowFocus: true,
@@ -85,8 +90,12 @@ function AdminUserBody() {
   const attendance = useQuery({
     queryKey: ['admin-user-attendance', userId],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: AttendanceRow[] }>(`/api/admin/users/${userId}/attendance`)
-      return res.data.data
+      const { data, error } = await supabase
+        .from('attendance')
+        .select('*, event:events(*)')
+        .eq('user_id', userId)
+      if (error) throw error
+      return data as AttendanceRow[]
     },
     enabled: !!userId,
     refetchOnWindowFocus: true,
@@ -95,8 +104,14 @@ function AdminUserBody() {
 
   const setStatus = useMutation({
     mutationFn: async (membership_status: 'active' | 'suspended' | 'revoked' | '') => {
-      const res = await api.post<{ ok: boolean; data: any }>(`/api/admin/users/${userId}/status`, { membership_status })
-      return res.data.data
+      const { data, error } = await supabase
+        .from('users')
+        .update({ membership_status })
+        .eq('id', userId)
+        .select()
+        .single()
+      if (error) throw error
+      return data
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ['admin-user', userId] })
@@ -106,8 +121,12 @@ function AdminUserBody() {
   const userBadges = useQuery({
     queryKey: ['user-badges', userId],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: UserBadge[] }>(`/api/users/${userId}/badges`)
-      return res.data.data
+      const { data, error } = await supabase
+        .from('user_badges')
+        .select('*, badge:badges(*)')
+        .eq('user_id', userId)
+      if (error) throw error
+      return data as UserBadge[]
     },
     enabled: !!userId
   })
@@ -115,16 +134,24 @@ function AdminUserBody() {
   const allBadges = useQuery({
     queryKey: ['admin-badges'],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: Badge[] }>(`/api/admin/badges`)
-      return res.data.data
+      const { data, error } = await supabase
+        .from('badges')
+        .select('*')
+      if (error) throw error
+      return data as Badge[]
     },
     enabled: !!userId
   })
 
   const awardBadge = useMutation({
     mutationFn: async (badgeId: string) => {
-      const res = await api.post(`/api/admin/users/${userId}/award-badge`, { badgeId })
-      return res.data
+      const { data, error } = await supabase
+        .from('user_badges')
+        .insert({ user_id: userId, badge_id: badgeId })
+        .select()
+        .single()
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['user-badges', userId] })
@@ -134,8 +161,13 @@ function AdminUserBody() {
 
   const createBadge = useMutation({
     mutationFn: async (badge: Partial<Badge>) => {
-      const res = await api.post(`/api/admin/badges`, badge)
-      return res.data
+      const { data, error } = await supabase
+        .from('badges')
+        .insert(badge)
+        .select()
+        .single()
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-badges'] })
@@ -147,13 +179,13 @@ function AdminUserBody() {
 
   const resetPassword = useMutation({
     mutationFn: async () => {
-      const res = await api.post<{ ok: boolean; data: { email: string; action_link: string | null } }>(
-        `/api/admin/users/${userId}/reset-password`
-      )
-      return res.data.data
+      if (!user.data?.email) return
+      const { error } = await supabase.auth.resetPasswordForEmail(user.data.email)
+      if (error) throw error
+      return true
     },
-    onSuccess: (data) => {
-      setResetLink(data.action_link ?? '')
+    onSuccess: () => {
+      setResetSent(true)
     }
   })
 
@@ -321,34 +353,21 @@ function AdminUserBody() {
                     </button>
                   </div>
 
-                  <div className="mt-8">
-                    <div className="text-xs font-bold text-zinc-600">إعادة تعيين كلمة المرور</div>
-                    <button
-                      type="button"
-                      className="mt-3 h-11 w-full rounded-2xl bg-black px-4 text-sm font-semibold text-white hover:bg-black/90 disabled:opacity-60"
-                      onClick={() => resetPassword.mutate()}
-                      disabled={resetPassword.isPending}
-                    >
-                      {resetPassword.isPending ? 'جاري الإنشاء…' : 'إنشاء رابط إعادة تعيين'}
-                    </button>
-
-                    {resetLink && (
-                      <div className="mt-4 rounded-3xl border border-black/10 bg-zinc-50 p-4">
-                        <div className="text-xs font-bold text-zinc-600">الرابط</div>
-                        <div className="mt-2 break-all font-mono text-xs text-zinc-700">{resetLink}</div>
-                        <button
-                          type="button"
-                          className="mt-3 h-10 rounded-2xl border border-black/10 bg-white px-4 text-sm font-semibold hover:bg-black/[0.03]"
-                          onClick={async () => {
-                            try {
-                              await navigator.clipboard.writeText(resetLink)
-                            } catch {
-                              window.prompt('انسخ الرابط:', resetLink)
-                            }
-                          }}
-                        >
-                          نسخ الرابط
-                        </button>
+                  <div className="mt-8 pt-8 border-t border-black/5">
+                    <div className="text-sm font-extrabold text-red-600">منطقة الخطر</div>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => resetPassword.mutate()}
+                        disabled={resetPassword.isPending || resetSent}
+                        className="h-10 rounded-2xl border border-red-100 bg-red-50 px-4 text-xs font-bold text-red-600 hover:bg-red-100 disabled:opacity-50"
+                      >
+                        {resetPassword.isPending ? 'جاري الإرسال…' : resetSent ? 'تم إرسال بريد إعادة التعيين' : 'إرسال بريد إعادة تعيين كلمة المرور'}
+                      </button>
+                    </div>
+                    {resetSent && (
+                      <div className="mt-3 rounded-2xl bg-emerald-50 p-4 text-xs font-bold text-emerald-800 border border-emerald-100">
+                        تم إرسال رابط إعادة تعيين كلمة المرور إلى بريد المستخدم بنجاح.
                       </div>
                     )}
                   </div>

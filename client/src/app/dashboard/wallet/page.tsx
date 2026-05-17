@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
-import { api } from '@/lib/api'
+import { supabase } from '@/lib/supabaseClient'
 import { LucideAward, LucideBadgeCheck, LucideDownload, LucideHistory, LucideMedal, LucideShieldCheck } from 'lucide-react'
 
 // Skeleton Component for Loading State
@@ -19,16 +19,28 @@ export default function WalletPage() {
   const { data: badges, isLoading: badgesLoading } = useQuery({
     queryKey: ['my-badges-v4'],
     queryFn: async () => {
-      const res = await api.get('/api/me/badges')
-      return res.data.data
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+      const { data, error } = await supabase
+        .from('user_badges')
+        .select('id, badge:badges(*)')
+        .eq('user_id', session.user.id)
+      if (error) throw error
+      return data
     }
   })
 
   const { data: certificates, isLoading: certsLoading } = useQuery({
     queryKey: ['my-certificates-v4'],
     queryFn: async () => {
-      const res = await api.get('/api/me/certificates')
-      return res.data.data
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+      const { data, error } = await supabase
+        .from('certificates')
+        .select('*, event:events(title, date, description)')
+        .eq('user_id', session.user.id)
+      if (error) throw error
+      return data
     }
   })
 
@@ -69,8 +81,8 @@ export default function WalletPage() {
                   <SkeletonCard />
                   <SkeletonCard />
                 </>
-              ) : badges?.length > 0 ? (
-                badges.map((b: any) => (
+              ) : (badges?.length ?? 0) > 0 ? (
+                badges?.map((b: any) => (
                   <div key={b.id} className="group relative overflow-hidden rounded-3xl border border-black/5 bg-white p-6 shadow-sm hover:border-amber-500/30 transition-all duration-300">
                     <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-all duration-300 mb-4 text-2xl">
                       {b.badge?.icon || '🏆'}
@@ -101,8 +113,8 @@ export default function WalletPage() {
             <div className="space-y-3">
               {certsLoading ? (
                 <div className="animate-pulse h-20 bg-zinc-50 rounded-2xl border border-black/5" />
-              ) : certificates?.length > 0 ? (
-                certificates.map((c: any) => (
+              ) : (certificates?.length ?? 0) > 0 ? (
+                certificates?.map((c: any) => (
                   <div key={c.id} className="flex items-center justify-between p-4 rounded-2xl border border-black/5 bg-white hover:bg-zinc-50 transition-colors">
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">

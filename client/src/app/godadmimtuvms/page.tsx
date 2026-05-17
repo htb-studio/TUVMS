@@ -4,9 +4,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import RoleGate from '@/components/RoleGate'
-import { api } from '@/lib/api'
+import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
 import { useState } from 'react'
+import * as XLSX from 'xlsx'
 import { LucideAward, LucideCalendar, LucidePlus, LucideTrash2, LucideUsers, LucideSettings, LucideSearch, LucideEye, LucideFileCheck, LucideDownload, LucidePieChart } from 'lucide-react'
 import {
   Chart as ChartJS,
@@ -62,18 +63,32 @@ type Badge = {
 }
 
 async function adminListUsers() {
-  const res = await api.get<{ ok: boolean; data: AdminUser[] }>('/api/admin/users')
-  return res.data.data
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data as AdminUser[]
 }
 
 async function adminSetRole(userId: string, role: AdminUser['role']) {
-  const res = await api.post<{ ok: boolean; data: any }>(`/api/admin/users/${userId}/role`, { role })
-  return res.data.data
+  const { data, error } = await supabase
+    .from('users')
+    .update({ role })
+    .eq('id', userId)
+    .select()
+    .single()
+  if (error) throw error
+  return data
 }
 
 async function adminListEvents() {
-  const res = await api.get<{ ok: boolean; data: AdminEvent[] }>('/api/admin/events')
-  return res.data.data
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data as AdminEvent[]
 }
 
 export default function GodAdminPage() {
@@ -94,8 +109,24 @@ function AdminBody() {
   const stats = useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: any }>('/api/admin/stats')
-      return res.data.data
+      const [u, e, b] = await Promise.all([
+        supabase.from('users').select('id', { count: 'exact', head: true }),
+        supabase.from('events').select('id', { count: 'exact', head: true }),
+        supabase.from('user_badges').select('id', { count: 'exact', head: true })
+      ])
+      
+      const { data: genderData } = await supabase.from('users').select('gender')
+      const genderStats = {
+        male: genderData?.filter(u => u.gender === 'male').length || 0,
+        female: genderData?.filter(u => u.gender === 'female').length || 0
+      }
+
+      return {
+        total_volunteers: u.count || 0,
+        total_events: e.count || 0,
+        total_badges: b.count || 0,
+        gender_stats: genderStats
+      }
     },
     enabled: activeTab === 'stats'
   })
@@ -124,16 +155,25 @@ function AdminBody() {
   const badges = useQuery({
     queryKey: ['admin-badges'],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: Badge[] }>('/api/admin/badges')
-      return res.data.data
+      const { data, error } = await supabase
+        .from('badges')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data as Badge[]
     },
     enabled: activeTab === 'badges'
   })
 
   const createBadge = useMutation({
     mutationFn: async (badge: Partial<Badge>) => {
-      const res = await api.post('/api/admin/badges', badge)
-      return res.data
+      const { data, error } = await supabase
+        .from('badges')
+        .insert(badge)
+        .select()
+        .single()
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-badges'] })
@@ -143,13 +183,31 @@ function AdminBody() {
 
   const deleteBadge = useMutation({
     mutationFn: async (badgeId: string) => {
-      const res = await api.delete(`/api/admin/badges/${badgeId}`)
-      return res.data
+      const { error } = await supabase
+        .from('badges')
+        .delete()
+        .eq('id', badgeId)
+      if (error) throw error
+      return true
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-badges'] })
     }
   })
+
+  const exportToExcel = async () => {
+    try {
+      const { data, error } = await supabase.from('users').select('*')
+      if (error) throw error
+      
+      const ws = XLSX.utils.json_to_sheet(data)
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'Volunteers')
+      XLSX.writeFile(wb, 'volunteers.xlsx')
+    } catch (e: any) {
+      alert('فشل التصدير: ' + e.message)
+    }
+  }
 
   return (
     <AppShell title="لوحة الأدمن">
@@ -226,22 +284,7 @@ function AdminBody() {
                 <h3 className="text-xl font-black mb-2">تصدير بيانات المتطوعين</h3>
                 <p className="text-sm text-zinc-500 mb-6 max-w-xs">يمكنك تحميل قائمة كاملة ببيانات المتطوعين المسجلين في النظام بصيغة Excel.</p>
                 <button
-                  onClick={async () => {
-                    try {
-                      const response = await api.get('/api/admin/export/users', { responseType: 'blob' })
-                      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-                      const url = window.URL.createObjectURL(blob)
-                      const a = document.createElement('a')
-                      a.href = url
-                      a.download = 'volunteers.xlsx'
-                      document.body.appendChild(a)
-                      a.click()
-                      window.URL.revokeObjectURL(url)
-                      document.body.removeChild(a)
-                    } catch (e: any) {
-                      alert('فشل التصدير: ' + (e.response?.data?.error || e.message))
-                    }
-                  }}
+                  onClick={exportToExcel}
                   className="h-12 px-8 rounded-2xl bg-emerald-600 text-white font-black text-sm hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2"
                 >
                   <LucideFileCheck size={18} /> تحميل ملف Excel
@@ -365,7 +408,7 @@ function AdminBody() {
                               </div>
                             </div>
                           </div>
-                          <div className="mt-6 flex gap-2">
+                              <div className="mt-6 flex gap-2">
                             <Link
                               href={`/godadmimtuvms/events/${ev.id}`}
                               className="flex-1 h-10 rounded-2xl bg-zinc-50 border border-black/5 text-xs font-black flex items-center justify-center hover:bg-black hover:text-white transition-all gap-2"
@@ -376,10 +419,27 @@ function AdminBody() {
                               onClick={async () => {
                                 if (confirm(`هل أنت متأكد من إصدار الشهادات لجميع من حضر في فعالية: ${ev.title}؟`)) {
                                   try {
-                                    const res = await api.post(`/api/admin/events/${ev.id}/issue-certificates`)
-                                    alert(`تم إصدار ${res.data.count} شهادة بنجاح!`)
+                                    const { data: atts, error: attError } = await supabase
+                                      .from('attendance')
+                                      .select('user_id')
+                                      .eq('event_id', ev.id)
+                                      .not('check_in', 'is', null)
+                                    
+                                    if (attError) throw attError
+                                    
+                                    const certs = atts.map(a => ({
+                                      user_id: a.user_id,
+                                      event_id: ev.id,
+                                    }))
+                                    
+                                    const { error: certError } = await supabase
+                                      .from('certificates')
+                                      .upsert(certs, { onConflict: 'user_id,event_id' })
+                                    
+                                    if (certError) throw certError
+                                    alert(`تم إصدار ${atts.length} شهادة بنجاح!`)
                                   } catch (e: any) {
-                                    alert('فشل إصدار الشهادات: ' + (e.response?.data?.error || e.message))
+                                    alert('فشل إصدار الشهادات: ' + e.message)
                                   }
                                 }
                               }}

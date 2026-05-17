@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
-import { api } from '@/lib/api'
+import { supabase } from '@/lib/supabaseClient'
 import { LucideSearch, LucideX, LucideCalendar, LucideChevronRight, LucideClock, LucideTag, LucideUsers, LucideStar, LucideSparkles, LucideArrowRight } from 'lucide-react'
 
 // Skeleton Loader for Event Cards
@@ -29,8 +29,21 @@ export default function EventsPage() {
   const events = useQuery({
     queryKey: ['events-v2'],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: any[] }>('/api/events')
-      return res.data.data
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+
+      const { data: profile } = await supabase.from('users').select('role').eq('id', session.user.id).single()
+      const isAdmin = profile?.role === 'admin' || profile?.role === 'organizer'
+
+      let query = supabase.from('events').select('*').order('created_at', { ascending: false })
+      
+      if (!isAdmin) {
+        query = query.eq('is_visible', true)
+      }
+
+      const { data, error } = await query
+      if (error) throw error
+      return data
     },
     refetchInterval: 10000
   })
@@ -38,8 +51,11 @@ export default function EventsPage() {
   const regs = useQuery({
     queryKey: ['my-registrations-v2'],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: any[] }>('/api/me/registrations')
-      return res.data.data
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+      const { data, error } = await supabase.from('registrations').select('event_id, created_at').eq('user_id', session.user.id)
+      if (error) throw error
+      return data
     }
   })
 

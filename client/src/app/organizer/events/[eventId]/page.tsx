@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import AuthGate from '@/components/AuthGate'
 import RoleGate from '@/components/RoleGate'
 import AppShell from '@/components/AppShell'
-import { api } from '@/lib/api'
+import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
 
 type EventRow = {
@@ -32,15 +32,38 @@ type ReportRow = {
 }
 
 async function getOrganizerEvent(eventId: string) {
-  const res = await api.get<{ ok: boolean; data: EventRow }>(`/api/organizer/events/${eventId}`)
-  return res.data.data
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .eq('id', eventId)
+    .single()
+  if (error) throw error
+  return data as EventRow
 }
 
 async function fetchAttendanceSummary(eventId: string) {
-  const res = await api.get<{ ok: boolean; data: { stats: any; rows: ReportRow[] } }>(
-    `/api/organizer/events/${eventId}/attendance`
-  )
-  return res.data.data
+  const { data: rows, error } = await supabase
+    .from('attendance')
+    .select('*, users(full_name, email)')
+    .eq('event_id', eventId)
+    .order('created_at', { ascending: false })
+  
+  if (error) throw error
+
+  const stats = {
+    total: rows?.length || 0,
+    checked_in: rows?.filter(r => r.check_in).length || 0,
+    checked_out: rows?.filter(r => r.check_out).length || 0
+  }
+
+  return { 
+    stats, 
+    rows: (rows || []).map((r: any) => ({
+      ...r,
+      user_full_name: r.users?.full_name,
+      user_email: r.users?.email
+    })) as ReportRow[]
+  }
 }
 
 export default function OrganizerEventDetailsPage() {

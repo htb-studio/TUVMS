@@ -6,7 +6,7 @@ import Link from 'next/link'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import RoleGate from '@/components/RoleGate'
-import { api } from '@/lib/api'
+import { supabase } from '@/lib/supabaseClient'
 
 type EventRow = {
   id: string
@@ -31,8 +31,12 @@ export default function OrganizerPage() {
   const events = useQuery({
     queryKey: ['org-events'],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: EventRow[] }>('/api/organizer/events')
-      return res.data.data
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data as EventRow[]
     },
     refetchOnWindowFocus: true,
     refetchInterval: 5000
@@ -43,6 +47,7 @@ export default function OrganizerPage() {
       const startIso = startTime ? new Date(startTime).toISOString() : null
       const endIso = endTime ? new Date(endTime).toISOString() : null
       const dateOnly = startTime ? new Date(startTime).toISOString().slice(0, 10) : null
+      
       if (startTime && Number.isNaN(new Date(startTime).getTime())) {
         throw new Error('وقت البداية غير صحيح')
       }
@@ -50,16 +55,24 @@ export default function OrganizerPage() {
         throw new Error('وقت النهاية غير صحيح')
       }
 
-      const res = await api.post<{ ok: boolean; data: EventRow }>('/api/events', {
-        type: 'general',
-        date: dateOnly,
-        title,
-        description: description || null,
-        capacity,
-        start_time: startIso,
-        end_time: endIso
-      })
-      return res.data.data
+      const { data, error } = await supabase
+        .from('events')
+        .insert({
+          title,
+          description: description || null,
+          capacity,
+          start_time: startIso,
+          end_time: endIso,
+          date: dateOnly,
+          qr_token: Math.random().toString(36).substring(2, 15),
+          is_visible: true,
+          is_closed: false
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data as EventRow
     },
     onSuccess: async (created) => {
       setCreateError('')
@@ -75,12 +88,10 @@ export default function OrganizerPage() {
         return [created, ...prev]
       })
       await qc.invalidateQueries({ queryKey: ['org-events'] })
-      await qc.invalidateQueries({ queryKey: ['events'] })
+      await qc.invalidateQueries({ queryKey: ['events-v2'] })
     },
     onError: (err: any) => {
-      const details = err?.response?.data?.details
-      const message = err?.response?.data?.error ?? err?.message
-      setCreateError(details ? `${message}: ${details}` : message || 'تعذر إنشاء الفعالية')
+      setCreateError(err.message || 'تعذر إنشاء الفعالية')
     }
   })
 

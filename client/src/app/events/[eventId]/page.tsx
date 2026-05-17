@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
-import { api } from '@/lib/api'
+import { supabase } from '@/lib/supabaseClient'
 import { LucideAward, LucideCalendar, LucideClock, LucideMapPin, LucideUsers, LucideArrowRight, LucideCheckCircle2, LucideQrCode, LucideAlertCircle } from 'lucide-react'
 
 const DetailsSkeleton = () => (
@@ -27,26 +27,47 @@ export default function EventDetailsPage() {
   const ev = useQuery({
     queryKey: ['event-v2', eventId],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: any[] }>('/api/events')
-      const found = res.data.data.find((x) => String(x.id) === String(eventId))
-      if (!found) throw new Error('Event not found')
-      return found
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('id', eventId)
+        .single()
+      if (error) throw error
+      if (!data) throw new Error('Event not found')
+      return data
     }
   })
 
   const regs = useQuery({
     queryKey: ['my-registrations-v2'],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: any[] }>('/api/me/registrations')
-      return res.data.data
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+      const { data, error } = await supabase
+        .from('registrations')
+        .select('event_id, created_at')
+        .eq('user_id', session.user.id)
+      if (error) throw error
+      return data
     }
   })
 
   const availability = useQuery({
     queryKey: ['event-availability-v2', eventId],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: any }>(`/api/events/${eventId}/availability`)
-      return res.data.data
+      const [evRes, regRes] = await Promise.all([
+        supabase.from('events').select('capacity').eq('id', eventId).single(),
+        supabase.from('registrations').select('id', { count: 'exact', head: true }).eq('event_id', eventId)
+      ])
+      
+      const capacity = evRes.data?.capacity || 0
+      const registeredCount = regRes.count || 0
+      
+      return { 
+        capacity, 
+        registeredCount, 
+        isFull: registeredCount >= capacity 
+      }
     },
     enabled: !!eventId
   })
@@ -56,8 +77,24 @@ export default function EventDetailsPage() {
 
   const register = useMutation({
     mutationFn: async () => {
-      const res = await api.post(`/api/events/${eventId}/register`)
-      return res.data
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+
+      const { data: evData } = await supabase.from('events').select('*').eq('id', eventId).single()
+      if (evData?.is_closed) throw new Error('Registration closed')
+
+      const { data, error } = await supabase
+        .from('registrations')
+        .insert({ 
+          user_id: session.user.id, 
+          event_id: eventId, 
+          token: Math.random().toString(36).substring(2) 
+        })
+        .select()
+        .single()
+      
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['my-registrations-v2'] })

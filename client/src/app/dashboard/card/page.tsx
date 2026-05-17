@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
-import { api } from '@/lib/api'
+import { supabase } from '@/lib/supabaseClient'
 import { useState } from 'react'
 import { LucideQrCode, LucideDownload, LucideShieldCheck, LucideMaximize2, LucideCopy, LucideCheck, LucideX } from 'lucide-react'
 import QRCode from 'react-qr-code'
@@ -16,16 +16,36 @@ export default function DigitalCardPage() {
   const me = useQuery({
     queryKey: ['me'],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: any }>('/api/me')
-      return res.data.data
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', session.user.id)
+        .single()
+      if (error) throw error
+      return data
     }
   })
 
   const stats = useQuery({
     queryKey: ['my-stats'],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: any }>('/api/me/stats')
-      return res.data.data
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+
+      const [regs, attend, badges] = await Promise.all([
+        supabase.from('registrations').select('id', { count: 'exact', head: true }).eq('user_id', session.user.id),
+        supabase.from('attendance').select('id', { count: 'exact', head: true }).eq('user_id', session.user.id).not('check_in', 'is', null),
+        supabase.from('user_badges').select('id', { count: 'exact', head: true }).eq('user_id', session.user.id)
+      ])
+
+      return {
+        eventsCount: regs.count || 0,
+        attendanceCount: attend.count || 0,
+        badgesCount: badges.count || 0,
+        totalHours: (attend.count || 0) * 2
+      }
     }
   })
 

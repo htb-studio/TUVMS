@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import RoleGate from '@/components/RoleGate'
-import { api } from '@/lib/api'
+import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
 import { LucideDownload, LucideSearch, LucideUserCheck, LucideUserX, LucideUsers } from 'lucide-react'
 
@@ -25,10 +25,53 @@ type ReportRow = {
 }
 
 async function fetchReport(eventId: string) {
-  const res = await api.get<{ ok: boolean; data: { event: any; stats: any; rows: ReportRow[] } }>(
-    `/api/organizer/events/${eventId}/attendance`
-  )
-  return res.data.data
+  const { data: event, error: evError } = await supabase.from('events').select('*').eq('id', eventId).single()
+  if (evError) throw evError
+
+  const { data: regs, error: regError } = await supabase
+    .from('registrations')
+    .select('*, users(*)')
+    .eq('event_id', eventId)
+  if (regError) throw regError
+
+  const { data: atts, error: attError } = await supabase
+    .from('attendance')
+    .select('*')
+    .eq('event_id', eventId)
+  if (attError) throw attError
+
+  const attMap = new Map((atts || []).map(a => [a.user_id, a]))
+
+  const rows: ReportRow[] = (regs || []).map(r => {
+    const att = attMap.get(r.user_id)
+    let status: ReportRow['status'] = 'registered'
+    if (att?.check_out) status = 'checked_out'
+    else if (att?.check_in) status = 'checked_in'
+
+    const user: any = r.users
+
+    return {
+      id: att?.id || r.id,
+      user_id: r.user_id,
+      event_id: eventId,
+      check_in: att?.check_in || null,
+      check_out: att?.check_out || null,
+      scanned_by: att?.scanned_by || null,
+      created_at: r.created_at,
+      user_email: user?.email || null,
+      user_full_name: user?.full_name || null,
+      user_phone: user?.phone || null,
+      status
+    }
+  })
+
+  const stats = {
+    total: rows.length,
+    checked_in: rows.filter(r => r.check_in).length,
+    checked_out: rows.filter(r => r.check_out).length
+  }
+
+  return { event, stats, rows }
 }
 
 function toCsv(rows: ReportRow[]) {

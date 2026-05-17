@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { api } from '@/lib/api'
 import { supabase } from '@/lib/supabaseClient'
 import { LucideLayoutDashboard, LucideCalendar, LucideAward, LucideUser, LucideLogOut } from 'lucide-react'
 
@@ -19,10 +18,15 @@ export default function AppShell({ title, children }: { title: string; children:
   const me = useQuery({
     queryKey: ['me'],
     queryFn: async () => {
-      const res = await api.get<{ ok: boolean; data: { full_name: string | null; email: string | null; role: string } }>(
-        '/api/me'
-      )
-      return res.data.data
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+      const { data, error } = await supabase
+        .from('users')
+        .select('full_name, email, role')
+        .eq('id', session.user.id)
+        .single()
+      if (error) throw error
+      return data
     }
   })
 

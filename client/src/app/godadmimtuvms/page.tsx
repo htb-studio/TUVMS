@@ -167,9 +167,16 @@ function AdminBody() {
 
   const createBadge = useMutation({
     mutationFn: async (badge: Partial<Badge>) => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('يجب تسجيل الدخول')
+
       const { data, error } = await supabase
         .from('badges')
-        .insert(badge)
+        .insert({
+          name: badge.name?.trim(),
+          icon: badge.icon?.trim() || '🏆',
+          description: badge.description?.trim() || null
+        })
         .select()
         .single()
       if (error) throw error
@@ -178,11 +185,17 @@ function AdminBody() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-badges'] })
       alert('تم إنشاء الوسام بنجاح!')
+    },
+    onError: (err: any) => {
+      alert('فشل إنشاء الوسام: ' + (err.message || 'خطأ غير معروف'))
     }
   })
 
   const deleteBadge = useMutation({
     mutationFn: async (badgeId: string) => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('يجب تسجيل الدخول')
+
       const { error } = await supabase
         .from('badges')
         .delete()
@@ -192,6 +205,10 @@ function AdminBody() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-badges'] })
+      alert('تم حذف الوسام بنجاح')
+    },
+    onError: (err: any) => {
+      alert('فشل حذف الوسام: ' + (err.message || 'خطأ غير معروف'))
     }
   })
 
@@ -427,9 +444,14 @@ function AdminBody() {
                                     
                                     if (attError) throw attError
                                     
+                                    const { data: { session } } = await supabase.auth.getSession()
+                                    if (!session) throw new Error('يجب تسجيل الدخول')
+
                                     const certs = atts.map(a => ({
                                       user_id: a.user_id,
                                       event_id: ev.id,
+                                      issued_by: session.user.id,
+                                      token: Math.random().toString(36).substring(2, 15)
                                     }))
                                     
                                     const { error: certError } = await supabase

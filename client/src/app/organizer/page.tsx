@@ -45,6 +45,9 @@ export default function OrganizerPage() {
 
   const createEvent = useMutation({
     mutationFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('يجب تسجيل الدخول للقيام بهذه العملية')
+
       const startIso = startTime ? new Date(startTime).toISOString() : null
       const endIso = endTime ? new Date(endTime).toISOString() : null
       const dateOnly = startTime ? new Date(startTime).toISOString().slice(0, 10) : null
@@ -59,9 +62,9 @@ export default function OrganizerPage() {
       const { data, error } = await supabase
         .from('events')
         .insert({
-          title,
-          description: description || null,
-          capacity,
+          title: title.trim(),
+          description: description.trim() || null,
+          capacity: Math.max(0, capacity),
           type: type.toLowerCase() || 'general',
           start_time: startIso,
           end_time: endIso,
@@ -83,6 +86,7 @@ export default function OrganizerPage() {
       setCapacity(0)
       setStartTime('')
       setEndTime('')
+      alert('تم إنشاء الفعالية بنجاح!')
 
       qc.setQueryData<EventRow[]>(['org-events'], (prev) => {
         if (!prev) return [created]
@@ -93,7 +97,9 @@ export default function OrganizerPage() {
       await qc.invalidateQueries({ queryKey: ['events-v2'] })
     },
     onError: (err: any) => {
-      setCreateError(err.message || 'تعذر إنشاء الفعالية')
+      const msg = err.message || 'تعذر إنشاء الفعالية'
+      setCreateError(msg)
+      alert('خطأ: ' + msg)
     }
   })
 

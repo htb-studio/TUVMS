@@ -67,6 +67,9 @@ export default function EventAttendancePrepPage() {
     }
 
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('يجب تسجيل الدخول للقيام بهذه العملية.')
+
       // 1. Verify organizer token for this event
       const { data: event, error: evError } = await supabase
         .from('events')
@@ -106,7 +109,8 @@ export default function EventAttendancePrepPage() {
           .insert({
             user_id: parsed.user_id,
             event_id: eventId,
-            check_in: at
+            check_in: at,
+            scanned_by: session.user.id
           })
         if (insError) throw insError
         action = 'check_in'
@@ -114,7 +118,10 @@ export default function EventAttendancePrepPage() {
         // Already checked in -> Check-out
         const { error: updError } = await supabase
           .from('attendance')
-          .update({ check_out: at })
+          .update({ 
+            check_out: at,
+            scanned_by: session.user.id
+          })
           .eq('id', att.id)
         if (updError) throw updError
         action = 'check_out'

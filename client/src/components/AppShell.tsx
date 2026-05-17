@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { LucideLayoutDashboard, LucideCalendar, LucideAward, LucideUser, LucideLogOut } from 'lucide-react'
 
@@ -15,6 +16,8 @@ function itemClass(active: boolean) {
 
 export default function AppShell({ title, children }: { title: string; children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
+
   const me = useQuery({
     queryKey: ['me'],
     queryFn: async () => {
@@ -22,13 +25,21 @@ export default function AppShell({ title, children }: { title: string; children:
       if (!session) throw new Error('No session')
       const { data, error } = await supabase
         .from('users')
-        .select('full_name, email, role')
+        .select('full_name, email, role, membership_status')
         .eq('id', session.user.id)
         .single()
       if (error) throw error
       return data
     }
   })
+
+  useEffect(() => {
+    if (me.data?.membership_status === 'suspended' || me.data?.membership_status === 'revoked') {
+      if (pathname !== '/account-suspended') {
+        router.push('/account-suspended')
+      }
+    }
+  }, [me.data, pathname, router])
 
   const role = (me.data?.role ?? 'volunteer') as 'volunteer' | 'organizer' | 'admin'
 

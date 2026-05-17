@@ -239,11 +239,24 @@ export default function EventDetailsPage() {
                   </button>
                 )}
 
-                <div className="mt-8 pt-8 border-t border-black/5">
+                <div className="mt-8 pt-8 border-t border-black/5 flex flex-wrap gap-3">
                   <div className="flex items-center gap-3 text-zinc-400">
                     <LucideMapPin size={18} />
                     <span className="text-[10px] font-bold">مقر الفعالية: داخل الحرم الجامعي</span>
                   </div>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(window.location.href)
+                        alert('تم نسخ رابط الفعالية!')
+                      } catch {
+                        alert('حدث خطأ أثناء النسخ')
+                      }
+                    }}
+                    className="mr-auto text-[10px] font-black text-amber-600 hover:underline"
+                  >
+                    مشاركة الرابط
+                  </button>
                 </div>
               </div>
             </div>

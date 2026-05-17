@@ -125,7 +125,10 @@ export default function WalletPage() {
                         <div className="text-[10px] text-zinc-400">{new Date(c.event?.date || c.created_at).toLocaleDateString('ar-SA')}</div>
                       </div>
                     </div>
-                    <button className="h-10 w-10 rounded-xl bg-zinc-100 text-zinc-600 hover:bg-black hover:text-white transition-all flex items-center justify-center">
+                    <button 
+                      onClick={() => alert('سيتم تفعيل تحميل الشهادة بصيغة PDF قريباً في التحديث القادم!')}
+                      className="h-10 w-10 rounded-xl bg-zinc-100 text-zinc-600 hover:bg-black hover:text-white transition-all flex items-center justify-center"
+                    >
                       <LucideDownload size={18} />
                     </button>
                   </div>

@@ -104,6 +104,9 @@ function AdminUserBody() {
 
   const setStatus = useMutation({
     mutationFn: async (membership_status: 'active' | 'suspended' | 'revoked' | '') => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('يجب تسجيل الدخول')
+
       const { data, error } = await supabase
         .from('users')
         .update({ membership_status })
@@ -115,6 +118,10 @@ function AdminUserBody() {
     },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ['admin-user', userId] })
+      alert('تم تحديث حالة العضوية بنجاح')
+    },
+    onError: (err: any) => {
+      alert('فشل تحديث الحالة: ' + (err.message || 'خطأ غير معروف'))
     }
   })
 
@@ -145,6 +152,9 @@ function AdminUserBody() {
 
   const awardBadge = useMutation({
     mutationFn: async (badgeId: string) => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('يجب تسجيل الدخول')
+
       const { data, error } = await supabase
         .from('user_badges')
         .insert({ user_id: userId, badge_id: badgeId })
@@ -156,6 +166,9 @@ function AdminUserBody() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['user-badges', userId] })
       alert('تم منح الوسام بنجاح!')
+    },
+    onError: (err: any) => {
+      alert('فشل منح الوسام: ' + (err.message || 'خطأ غير معروف'))
     }
   })
 

@@ -119,9 +119,15 @@ export default function AuthPage() {
         return
       }
 
-      const phoneNorm = phone.trim()
+      let phoneNorm = phone.trim()
+      if (phoneNorm.startsWith('05')) {
+        phoneNorm = '+966' + phoneNorm.slice(1)
+      } else if (phoneNorm.startsWith('5')) {
+        phoneNorm = '+966' + phoneNorm
+      }
+
       if (!phoneNorm.startsWith('+966') || phoneNorm.length !== 13 || !/^\+966\d{9}$/.test(phoneNorm)) {
-        setStatus({ type: 'error', msg: 'رقم الجوال يجب أن يبدأ بـ +966 ويكون 13 خانة بالضبط' })
+        setStatus({ type: 'error', msg: 'رقم الجوال يجب أن يكون بالصيغة السعودية (05xxxxxxxx)' })
         return
       }
 

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import { supabase } from '@/lib/supabaseClient'
-import { LucideAward, LucideCalendar, LucideClock, LucideMapPin, LucideUsers, LucideArrowRight, LucideCheckCircle2, LucideQrCode, LucideAlertCircle } from 'lucide-react'
+import { LucideAward, LucideCalendar, LucideClock, LucideMapPin, LucideUsers, LucideArrowRight, LucideCheckCircle2, LucideQrCode, LucideAlertCircle, LucideLock } from 'lucide-react'
 
 const DetailsSkeleton = () => (
   <div className="animate-pulse space-y-6">
@@ -74,6 +74,8 @@ export default function EventDetailsPage() {
 
   const registered = (regs.data ?? []).some((r) => String(r.event_id) === String(eventId))
   const isFull = !!availability.data?.isFull
+  const event = ev.data
+  const isClosed = event?.is_closed === true
 
   const register = useMutation({
     mutationFn: async () => {
@@ -108,9 +110,8 @@ export default function EventDetailsPage() {
     }
   })
 
-  if (ev.isLoading) return <AuthGate title="جاري التحميل..."><AppShell title="جاري التحميل..."><DetailsSkeleton /></AppShell></AuthGate>
-
-  const event = ev.data
+  if (ev.isLoading || regs.isLoading || availability.isLoading) return <AuthGate title="جاري التحميل..."><AppShell title="جاري التحميل..."><DetailsSkeleton /></AppShell></AuthGate>
+  if (ev.isError) return <AuthGate title="خطأ"><AppShell title="خطأ"><div className="p-12 text-center font-black text-red-600">عذراً، الفعالية غير موجودة أو حدث خطأ أثناء التحميل.</div></AppShell></AuthGate>
 
   return (
     <AuthGate title="الرجاء تسجيل الدخول">
@@ -222,6 +223,12 @@ export default function EventDetailsPage() {
                       <LucideQrCode size={18} />
                       إظهار بطاقة الحضور
                     </Link>
+                  </div>
+                ) : isClosed ? (
+                  <div className="flex flex-col items-center justify-center py-8 px-4 rounded-3xl bg-red-50 border border-red-100 text-center">
+                    <LucideLock size={32} className="text-red-300 mb-3" />
+                    <div className="text-red-900 font-black text-sm">التسجيل مغلق حالياً</div>
+                    <p className="text-[10px] text-red-600/70 mt-1">عذراً، انتهت فترة التسجيل في هذه الفعالية</p>
                   </div>
                 ) : isFull ? (
                   <div className="flex flex-col items-center justify-center py-8 px-4 rounded-3xl bg-zinc-50 border border-zinc-100 text-center">

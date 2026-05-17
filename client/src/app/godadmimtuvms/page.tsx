@@ -50,6 +50,7 @@ type AdminEvent = {
   date: string | null
   start_time: string | null
   end_time: string | null
+  type: string
   admin_tag?: string | null
   certificate_text?: string | null
 }

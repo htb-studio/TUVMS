@@ -169,6 +169,7 @@ export default function DigitalCardPage() {
               {copied ? 'تم النسخ' : 'نسخ الرقم الجامعي'}
             </button>
             <button 
+              onClick={() => alert('ميزة حفظ البطاقة كصورة ستتوفر قريباً في التحديث القادم!')}
               className="flex items-center justify-center gap-3 h-16 rounded-[1.5rem] bg-white border border-black/10 text-zinc-600 font-black text-sm hover:bg-zinc-50 transition-all active:scale-95"
             >
               <LucideDownload size={18} />

@@ -56,7 +56,12 @@ export default function GodAdminEventSettingsPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-event', eventId] })
+      qc.invalidateQueries({ queryKey: ['admin-events'] })
       qc.invalidateQueries({ queryKey: ['events-v2'] })
+      alert('تم تحديث الإعدادات بنجاح!')
+    },
+    onError: (err: any) => {
+      alert('فشل التحديث: ' + (err.message || 'خطأ غير معروف'))
     }
   })
 

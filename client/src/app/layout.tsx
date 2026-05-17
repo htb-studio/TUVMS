@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import QueryProvider from '@/components/QueryProvider'
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: 'TUVMS — نادي التطوع',
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-[#FFFEF9] text-[#1A1814]" style={{ fontFamily: 'Cairo, ui-sans-serif, system-ui' }}>
         <QueryProvider>{children}</QueryProvider>
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   )

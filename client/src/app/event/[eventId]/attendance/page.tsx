@@ -35,11 +35,7 @@ export default function EventAttendancePrepPage() {
 
   useEffect(() => {
     return () => {
-      try {
-        ;(readerRef.current as any)?.reset?.()
-      } catch {
-        
-      }
+      stop()
     }
   }, [])
 
@@ -167,6 +163,13 @@ export default function EventAttendancePrepPage() {
     setStatus('starting')
 
     try {
+      // Explicitly request camera permission first
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } 
+      })
+      // Stop the initial stream immediately, zxing will create its own
+      stream.getTracks().forEach(track => track.stop())
+
       const reader = new BrowserMultiFormatReader()
       readerRef.current = reader
 
@@ -206,8 +209,8 @@ export default function EventAttendancePrepPage() {
       setRunning(false)
       setStatus('idle')
       const name = String(e?.name ?? '')
-      if (name === 'NotAllowedError' || name === 'SecurityError') {
-        setError('تم رفض إذن الكاميرا. يمكنك السماح من إعدادات المتصفح أو استخدم الإدخال اليدوي.')
+      if (name === 'NotAllowedError' || name === 'SecurityError' || name === 'PermissionDeniedError') {
+        setError('يرجى تفعيل صلاحية الكاميرا من إعدادات المتصفح للمتابعة.')
       } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
         setError('لا توجد كاميرا متاحة على هذا الجهاز. استخدم الإدخال اليدوي.')
       } else {
@@ -218,9 +221,18 @@ export default function EventAttendancePrepPage() {
 
   function stop() {
     try {
-      ;(readerRef.current as any)?.reset?.()
-    } catch {
-      
+      const reader = readerRef.current as any
+      if (reader) {
+        reader.reset()
+        // Force stop all tracks if zxing didn't
+        if (videoRef.current && videoRef.current.srcObject) {
+          const stream = videoRef.current.srcObject as MediaStream
+          stream.getTracks().forEach(track => track.stop())
+          videoRef.current.srcObject = null
+        }
+      }
+    } catch (err) {
+      console.error('Error stopping camera:', err)
     }
     setRunning(false)
     setStatus('idle')

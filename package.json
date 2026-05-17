@@ -11,6 +11,7 @@
     "start": "npm run start -w server & npm run start -w client"
   },
   "dependencies": {
+    "@vercel/speed-insights": "^2.0.0",
     "nanoid": "^5.1.7",
     "postcss": "^8.5.9"
   }

@@ -193,7 +193,9 @@ function AdminUserBody() {
   const resetPassword = useMutation({
     mutationFn: async () => {
       if (!user.data?.email) return
-      const { error } = await supabase.auth.resetPasswordForEmail(user.data.email)
+      const { error } = await supabase.auth.resetPasswordForEmail(user.data.email, {
+        redirectTo: 'https://athar.it.com/reset-password'
+      })
       if (error) throw error
       return true
     },

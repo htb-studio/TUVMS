@@ -504,8 +504,11 @@ export default function AuthPage() {
               {busy ? 'جاري المعالجة…' : mode === 'signin' ? 'دخول' : 'إنشاء الحساب'}
             </button>
 
-            <div className="mt-6 text-center text-sm text-white/45">
-              <Link href="/" className="text-[#C9A84C] font-bold hover:text-[#E8C97A]">
+            <div className="mt-6 flex items-center justify-between text-sm text-white/45">
+              <Link href="/forgot-password" className="text-[#C9A84C] font-bold hover:text-[#E8C97A]">
+                نسيت كلمة المرور؟
+              </Link>
+              <Link href="/" className="text-white/45 hover:text-white">
                 رجوع للصفحة التعريفية
               </Link>
             </div>

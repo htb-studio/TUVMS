@@ -10,6 +10,7 @@ import ConfirmDialog from '@/components/ConfirmDialog'
 import Toast, { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabaseClient'
 import { LucideAward, LucideCalendar, LucideClock, LucideMapPin, LucideUsers, LucideArrowRight, LucideCheckCircle2, LucideQrCode, LucideAlertCircle, LucideLock, LucideXCircle } from 'lucide-react'
+import { getLevelTheme } from '@/lib/themes'
 
 const DetailsSkeleton = () => (
   <div className="animate-pulse space-y-6">
@@ -28,6 +29,25 @@ export default function EventDetailsPage() {
   const qc = useQueryClient()
   const toast = useToast()
   const [showWithdrawDialog, setShowWithdrawDialog] = useState(false)
+
+  // Get user level for theme
+  const me = useQuery({
+    queryKey: ['me'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+      const { data, error } = await supabase
+        .from('users')
+        .select('level')
+        .eq('id', session.user.id)
+        .single()
+      if (error) throw error
+      return data
+    }
+  })
+
+  const level = me.data?.level || 1
+  const theme = getLevelTheme(level)
 
   const ev = useQuery({
     queryKey: ['event-v2', eventId],
@@ -291,7 +311,10 @@ export default function EventDetailsPage() {
                   <button
                     onClick={() => register.mutate()}
                     disabled={register.isPending}
-                    className="w-full h-16 rounded-2xl bg-[#C9A84C] text-black font-black text-base flex items-center justify-center gap-2 hover:bg-[#8B6914] hover:text-white transition-all shadow-lg shadow-amber-500/20 active:scale-95 disabled:opacity-50"
+                    className={`w-full h-16 rounded-2xl text-black font-black text-base flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 disabled:opacity-50 ${theme.button.primary}`}
+                    style={{
+                      boxShadow: `0 10px 40px -10px ${theme.primary}40`
+                    }}
                   >
                     {register.isPending ? 'جاري تسجيلك...' : 'تأكيد الانضمام الآن'}
                   </button>

@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
 import { useMemo, useEffect } from 'react'
 import { LucideAward, LucideCalendar, LucideChevronLeft, LucideClock, LucideFileCheck, LucideTrophy } from 'lucide-react'
-import '@/styles/themes.css'
+import { getLevelTheme } from '@/lib/themes'
 
 export default function DashboardPage() {
   const stats = useQuery({
@@ -52,6 +52,7 @@ export default function DashboardPage() {
 
   // Calculate level and progress (with new doubling system)
   const level = me.data?.level || 1
+  const theme = getLevelTheme(level)
   const totalPoints = me.data?.total_points || 0
   
   // Points thresholds for each level (doubling system)
@@ -68,9 +69,13 @@ export default function DashboardPage() {
   useEffect(() => {
     if (me.data?.level) {
       document.body.setAttribute('data-theme-level', String(me.data.level))
-      console.log('Theme applied for level:', me.data.level)
+      document.body.style.setProperty('--theme-primary', theme.primary)
+      document.body.style.setProperty('--theme-secondary', theme.secondary)
+      document.body.style.setProperty('--theme-accent', theme.accent)
+      document.body.style.setProperty('--theme-background', theme.background)
+      console.log('Theme applied for level:', me.data.level, theme.name)
     }
-  }, [me.data?.level])
+  }, [me.data?.level, theme])
 
   return (
     <AuthGate title="الرجاء تسجيل الدخول">

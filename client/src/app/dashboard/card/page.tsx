@@ -8,6 +8,7 @@ import { useState, useRef } from 'react'
 import { LucideQrCode, LucideDownload, LucideShieldCheck, LucideMaximize2, LucideCopy, LucideCheck, LucideX, LucideLock, LucideCrown } from 'lucide-react'
 import QRCode from 'react-qr-code'
 import html2canvas from 'html2canvas'
+import { getLevelTheme } from '@/lib/themes'
 
 export default function DigitalCardPage() {
   const [isFlipped, setIsFlipped] = useState(false)
@@ -53,6 +54,7 @@ export default function DigitalCardPage() {
 
   const user = me.data
   const level = user?.level || 1
+  const theme = getLevelTheme(level)
   const qrValue = user ? JSON.stringify({ id: user.id, type: 'volunteer_card' }) : ''
 
   // Feature unlock levels
@@ -85,11 +87,18 @@ export default function DigitalCardPage() {
       const ctx = canvas.getContext('2d')
       if (!ctx) throw new Error('Canvas context error')
 
-      // Background gradient based on level
+      // Background gradient based on theme
       const gradient = ctx.createLinearGradient(0, 0, 800, 500)
-      if (level >= 7) {
-        gradient.addColorStop(0, '#C9A84C')
+      if (level === 10) {
+        gradient.addColorStop(0, '#FFD700')
+        gradient.addColorStop(0.5, '#FFA500')
+        gradient.addColorStop(1, '#FF6B35')
+      } else if (level >= 7) {
+        gradient.addColorStop(0, '#D4AF37')
         gradient.addColorStop(1, '#8B6914')
+      } else if (level >= 6) {
+        gradient.addColorStop(0, '#C9A84C')
+        gradient.addColorStop(1, '#1a1a1a')
       } else {
         gradient.addColorStop(0, '#1a1a1a')
         gradient.addColorStop(1, '#0a0a0a')
@@ -98,15 +107,15 @@ export default function DigitalCardPage() {
       ctx.fillRect(0, 0, 800, 500)
 
       // Border
-      ctx.strokeStyle = level >= 7 ? '#FFD700' : '#ffffff20'
-      ctx.lineWidth = 8
+      ctx.strokeStyle = level === 10 ? '#FFD700' : level >= 7 ? '#D4AF37' : '#ffffff20'
+      ctx.lineWidth = level === 10 ? 12 : 8
       ctx.strokeRect(4, 4, 792, 492)
 
       // Header
       ctx.fillStyle = '#ffffff40'
       ctx.font = 'bold 14px Arial'
       ctx.fillText('Taif University', 40, 50)
-      ctx.fillStyle = '#C9A84C'
+      ctx.fillStyle = level === 10 ? '#FFD700' : level >= 7 ? '#D4AF37' : '#C9A84C'
       ctx.font = 'bold 32px Arial'
       ctx.fillText('نادي التطوع', 40, 85)
 
@@ -119,9 +128,9 @@ export default function DigitalCardPage() {
       ctx.fillText(user.email || '', 40, 180)
 
       // Stats
-      ctx.fillStyle = '#C9A84C'
+      ctx.fillStyle = level === 10 ? '#FFD700' : level >= 7 ? '#D4AF37' : '#C9A84C'
       ctx.font = 'bold 28px Arial'
-      ctx.fillText(`المستوى: ${level}`, 40, 250)
+      ctx.fillText(`المستوى: ${level} - ${theme.name}`, 40, 250)
       ctx.fillText(`النقاط: ${user.total_points || 0}`, 40, 290)
       ctx.fillText(`الساعات: ${stats.data?.totalHours || 0}`, 40, 330)
 

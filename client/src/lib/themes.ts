@@ -251,7 +251,7 @@ export const levelThemes: Record<number, LevelTheme> = {
     secondary: '#FFA500',
     accent: '#FF6B35',
     background: 'linear-gradient(135deg, #1a0a00 0%, #2d1810 50%, #1a0a00 100%)',
-    text: '#FFFFFF',
+    text: '#757373',
     border: '#FFD700',
     gradient: 'from-[#FFD700] via-[#FFA500] to-[#FF6B35]',
     glow: 'shadow-[0_0_60px_rgba(255,215,0,0.5)]',

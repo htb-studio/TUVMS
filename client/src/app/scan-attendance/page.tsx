@@ -70,15 +70,26 @@ function ScanAttendanceBody() {
       setLoading(true)
       setError(null)
       
-      // decodedText should be the user_id from QR code
+      // Parse QR code data - it might be JSON or just the user_id
+      let userId = decodedText
+      try {
+        const parsed = JSON.parse(decodedText)
+        if (parsed.id) {
+          userId = parsed.id
+        }
+      } catch {
+        // If not JSON, use the decoded text directly as user_id
+      }
+      
+      // Fetch user from database
       const { data: user, error: userError } = await supabase
         .from('users')
         .select('*')
-        .eq('id', decodedText)
+        .eq('id', userId)
         .single()
       
       if (userError || !user) {
-        setError('المستخدم غير موجود')
+        setError('المتطوب غير موجود في النظام')
         return
       }
       

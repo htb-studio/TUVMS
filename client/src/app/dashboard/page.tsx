@@ -50,12 +50,19 @@ export default function DashboardPage() {
 
   const role = useMemo(() => (me.data?.role ?? 'volunteer') as 'volunteer' | 'organizer' | 'admin', [me.data?.role])
 
-  // Calculate level and progress
+  // Calculate level and progress (with new doubling system)
   const level = me.data?.level || 1
   const totalPoints = me.data?.total_points || 0
-  const pointsForNextLevel = level * 10
-  const pointsInCurrentLevel = totalPoints % 10
-  const progressPercent = (pointsInCurrentLevel / 10) * 100
+  
+  // Points thresholds for each level (doubling system)
+  const levelThresholds = [0, 10, 20, 40, 80, 160, 320, 640, 1280, 2560]
+  const currentLevelThreshold = levelThresholds[level - 1] || 0
+  const nextLevelThreshold = levelThresholds[level] || 2560
+  
+  // Calculate progress within current level
+  const pointsInCurrentLevel = totalPoints - currentLevelThreshold
+  const pointsNeededForNextLevel = nextLevelThreshold - currentLevelThreshold
+  const progressPercent = level >= 10 ? 100 : Math.min(100, (pointsInCurrentLevel / pointsNeededForNextLevel) * 100)
 
   // Apply theme based on level
   useEffect(() => {
@@ -90,11 +97,15 @@ export default function DashboardPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-white/60 font-medium">النقاط: {totalPoints}</span>
-                  <span className="text-[#C9A84C] font-bold">{pointsInCurrentLevel}/10 للمستوى التالي</span>
+                  {level >= 10 ? (
+                    <span className="text-[#C9A84C] font-bold">🏆 المستوى الأقصى!</span>
+                  ) : (
+                    <span className="text-[#C9A84C] font-bold">{pointsInCurrentLevel}/{pointsNeededForNextLevel} للمستوى التالي</span>
+                  )}
                 </div>
                 <div className="h-3 w-full rounded-full bg-white/10 overflow-hidden">
                   <div 
-                    className="h-full rounded-full bg-gradient-to-r from-[#C9A84C] to-[#E8C97A] transition-all duration-500"
+                    className={`h-full rounded-full transition-all duration-500 ${level >= 10 ? 'bg-gradient-to-r from-[#FFD700] to-[#FFA500]' : 'bg-gradient-to-r from-[#C9A84C] to-[#E8C97A]'}`}
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>

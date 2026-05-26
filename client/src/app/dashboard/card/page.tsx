@@ -4,14 +4,16 @@ import { useQuery } from '@tanstack/react-query'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import { supabase } from '@/lib/supabaseClient'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { LucideQrCode, LucideDownload, LucideShieldCheck, LucideMaximize2, LucideCopy, LucideCheck, LucideX, LucideLock, LucideCrown } from 'lucide-react'
 import QRCode from 'react-qr-code'
+import html2canvas from 'html2canvas'
 
 export default function DigitalCardPage() {
   const [isFlipped, setIsFlipped] = useState(false)
   const [showQRModal, setShowQRModal] = useState(false)
   const [copied, setCopied] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
   
   const me = useQuery({
     queryKey: ['me'],
@@ -72,6 +74,26 @@ export default function DigitalCardPage() {
     }
   }
 
+  const downloadCard = async () => {
+    if (!cardRef.current) return
+    
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        scale: 2,
+        backgroundColor: null,
+        logging: false
+      })
+      
+      const link = document.createElement('a')
+      link.download = `tuvms-card-${user?.full_name || 'card'}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } catch (error) {
+      console.error('Error saving card:', error)
+      alert('حدث خطأ أثناء حفظ البطاقة')
+    }
+  }
+
   if (me.isLoading) return <AuthGate title="جاري التحميل..."><AppShell title="البطاقة الرقمية"><div className="animate-pulse space-y-4"><div className="h-[450px] bg-zinc-100 rounded-[2.5rem]" /></div></AppShell></AuthGate>
 
   return (
@@ -88,7 +110,7 @@ export default function DigitalCardPage() {
             className="group relative h-[500px] w-full [perspective:2000px] cursor-pointer"
             onClick={() => setIsFlipped(!isFlipped)}
           >
-            <div className={`relative h-full w-full rounded-[3rem] transition-all duration-700 [transform-style:preserve-3d] shadow-2xl shadow-black/20 ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
+            <div ref={cardRef} className={`relative h-full w-full rounded-[3rem] transition-all duration-700 [transform-style:preserve-3d] shadow-2xl shadow-black/20 ${isFlipped ? '[transform:rotateY(180deg)]' : ''} lg:group-hover:shadow-2xl`}>
               
               <div className="absolute inset-0 h-full w-full [backface-visibility:hidden]">
                 <div className={`h-full w-full rounded-[3rem] p-8 text-white relative overflow-hidden flex flex-col ${level >= 7 ? 'bg-gradient-to-br from-[#C9A84C] to-[#8B6914]' : 'bg-zinc-900'} border-4 ${level >= 7 ? 'border-[#FFD700]' : 'border-white/5'}`}>
@@ -198,7 +220,7 @@ export default function DigitalCardPage() {
             <button 
               onClick={() => {
                 if (isFeatureUnlocked(featureUnlocks.downloadCard)) {
-                  alert('ميزة حفظ البطاقة كصورة ستتوفر قريباً في التحديث القادم!')
+                  downloadCard()
                 } else {
                   alert(`هذه الميزة تتطلب المستوى ${featureUnlocks.downloadCard}\nمستواك الحالي: ${level}`)
                 }

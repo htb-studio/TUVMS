@@ -1,8 +1,29 @@
+'use client'
+
 import Link from 'next/link'
 import { landingContent } from '@/content/landing'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabaseClient'
+import { LucideCalendar, LucideClock, LucideMapPin, LucideCheckCircle, LucideXCircle } from 'lucide-react'
 
 export default function HomePage() {
   const c = landingContent
+
+  // Fetch public events
+  const events = useQuery({
+    queryKey: ['public-events'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('is_visible', true)
+        .order('start_time', { ascending: true })
+        .limit(5)
+      if (error) throw error
+      return data
+    }
+  })
+
   return (
     <main className="min-h-screen bg-[#0D0C0A] text-white relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
@@ -39,6 +60,72 @@ export default function HomePage() {
               <div className="mt-2 text-sm font-semibold text-[#6B6355]">{s.l}</div>
             </div>
           ))}
+        </div>
+
+        {/* Events Bar */}
+        <div className="mt-14">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-black">الفعاليات الحالية</h2>
+            <Link href="/events" className="text-sm font-bold text-[#C9A84C] hover:text-[#E8C97A]">
+              عرض الكل ←
+            </Link>
+          </div>
+          
+          {events.isLoading ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse rounded-2xl border border-white/10 bg-white/5 p-6 h-40" />
+              ))}
+            </div>
+          ) : events.data && events.data.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {events.data.map((event: any) => (
+                <div
+                  key={event.id}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-[#C9A84C]/30 transition-all"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-black ${
+                      event.registration_status === 'open' 
+                        ? 'bg-emerald-500/20 text-emerald-400' 
+                        : 'bg-red-500/20 text-red-400'
+                    }`}>
+                      {event.registration_status === 'open' ? (
+                        <LucideCheckCircle size={12} />
+                      ) : (
+                        <LucideXCircle size={12} />
+                      )}
+                      <span>{event.registration_status === 'open' ? 'التسجيل مفتوح' : 'التسجيل مغلق'}</span>
+                    </div>
+                    <span className="text-[10px] text-white/40">#{event.id.slice(0, 4)}</span>
+                  </div>
+                  
+                  <h3 className="text-lg font-black mb-3 line-clamp-2">{event.title}</h3>
+                  
+                  <div className="space-y-2 text-xs text-white/60">
+                    <div className="flex items-center gap-2">
+                      <LucideCalendar size={14} className="text-[#C9A84C]" />
+                      <span>{event.start_time ? new Date(event.start_time).toLocaleDateString('ar-SA') : 'قريباً'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <LucideClock size={14} className="text-[#C9A84C]" />
+                      <span>{event.start_time ? new Date(event.start_time).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</span>
+                    </div>
+                    {event.location && (
+                      <div className="flex items-center gap-2">
+                        <LucideMapPin size={14} className="text-[#C9A84C]" />
+                        <span className="line-clamp-1">{event.location}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
+              <div className="text-white/60">لا توجد فعاليات حالياً</div>
+            </div>
+          )}
         </div>
 
         <div className="mt-14 grid gap-4 sm:grid-cols-3">

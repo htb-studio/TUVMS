@@ -2,13 +2,13 @@
 
 import { useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import RoleGate from '@/components/RoleGate'
 import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
-import { LucideDownload, LucideSearch, LucideUserCheck, LucideUserX, LucideUsers } from 'lucide-react'
+import { LucideDownload, LucideSearch, LucideUserCheck, LucideUserX, LucideUsers, LucidePlus, LucideTrash2, LucideX } from 'lucide-react'
 
 type ReportRow = {
   id: string
@@ -121,8 +121,11 @@ function toCsv(rows: ReportRow[]) {
 export default function OrganizerEventAttendanceReportPage() {
   const params = useParams<{ eventId: string }>()
   const eventId = params.eventId
+  const qc = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'checked_in' | 'checked_out' | 'not_checked'>('all')
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [addUserId, setAddUserId] = useState('')
 
   const q = useQuery({
     queryKey: ['org-att-report', eventId],
@@ -159,6 +162,70 @@ export default function OrganizerEventAttendanceReportPage() {
 
   const csv = useMemo(() => (q.data ? toCsv(q.data.rows) : ''), [q.data])
 
+  // Mutation to add attendance manually
+  const addAttendanceMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('يجب تسجيل الدخول')
+
+      // Check if user exists
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single()
+      
+      if (userError || !user) {
+        throw new Error('المستخدم غير موجود')
+      }
+
+      // Add attendance record
+      const { error: attError } = await supabase.from('attendance').insert({
+        user_id: userId,
+        event_id: eventId,
+        check_in: new Date().toISOString(),
+        scanned_by: session.user.id
+      })
+
+      if (attError) throw attError
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['org-att-report', eventId] })
+      setShowAddModal(false)
+      setAddUserId('')
+      alert('تم إضافة الحضور بنجاح')
+    },
+    onError: (error: any) => {
+      alert('فشل إضافة الحضور: ' + error.message)
+    }
+  })
+
+  // Mutation to remove attendance
+  const removeAttendanceMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      if (!confirm('هل أنت متأكد من إلغاء حضور هذا المتطوب؟')) {
+        throw new Error('تم الإلغاء')
+      }
+
+      const { error } = await supabase
+        .from('attendance')
+        .delete()
+        .eq('user_id', userId)
+        .eq('event_id', eventId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['org-att-report', eventId] })
+      alert('تم إلغاء الحضور بنجاح')
+    },
+    onError: (error: any) => {
+      if (error.message !== 'تم الإلغاء') {
+        alert('فشل إلغاء الحضور: ' + error.message)
+      }
+    }
+  })
+
   return (
     <AuthGate title="الرجاء تسجيل الدخول">
       <RoleGate allow={['organizer', 'admin']}>
@@ -172,6 +239,13 @@ export default function OrganizerEventAttendanceReportPage() {
 
             {q.data && (
               <div className="flex gap-2">
+                <button
+                  className="flex items-center gap-2 h-11 rounded-2xl bg-[#C9A84C] px-5 text-sm font-semibold text-[#0D0C0A] hover:bg-[#E8C97A] transition-all active:scale-95"
+                  onClick={() => setShowAddModal(true)}
+                >
+                  <LucidePlus size={18} />
+                  إضافة حضور يدوياً
+                </button>
                 <button
                   className="flex items-center gap-2 h-11 rounded-2xl bg-black px-5 text-sm font-semibold text-white hover:bg-black/90 transition-all active:scale-95"
                   onClick={async () => {
@@ -285,6 +359,7 @@ export default function OrganizerEventAttendanceReportPage() {
                       <tr className="border-b border-black/5 bg-zinc-50/30 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
                         <th className="px-6 py-4">المتطوع</th>
                         <th className="px-6 py-4 text-center">الحالة</th>
+                        <th className="px-6 py-4 text-center">إجراءات</th>
                         <th className="px-6 py-4">الدخول</th>
                         <th className="px-6 py-4">الانصراف</th>
                       </tr>
@@ -292,7 +367,7 @@ export default function OrganizerEventAttendanceReportPage() {
                     <tbody className="divide-y divide-black/5">
                       {filteredRows.length === 0 ? (
                         <tr>
-                          <td colSpan={4} className="py-20 text-center text-sm text-zinc-400 font-bold">
+                          <td colSpan={5} className="py-20 text-center text-sm text-zinc-400 font-bold">
                             لا توجد نتائج تطابق بحثك.
                           </td>
                         </tr>
@@ -313,6 +388,17 @@ export default function OrganizerEventAttendanceReportPage() {
                                  r.status === 'checked_in' ? 'حاضر' : 'مسجل'}
                               </span>
                             </td>
+                            <td className="px-6 py-4 text-center">
+                              {r.check_in && (
+                                <button
+                                  onClick={() => removeAttendanceMutation.mutate(r.user_id)}
+                                  className="flex items-center justify-center gap-1 h-8 px-3 rounded-xl bg-red-50 text-red-600 text-[10px] font-black hover:bg-red-100 transition-all"
+                                >
+                                  <LucideTrash2 size={12} />
+                                  إلغاء
+                                </button>
+                              )}
+                            </td>
                             <td className="px-6 py-4 text-xs font-mono text-zinc-500">
                               {r.check_in ? new Date(r.check_in).toLocaleTimeString('ar-SA') : '—'}
                             </td>
@@ -327,6 +413,46 @@ export default function OrganizerEventAttendanceReportPage() {
                 </div>
               </div>
             </>
+          )}
+
+          {/* Add Attendance Modal */}
+          {showAddModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-xl bg-black/60 animate-in fade-in duration-300">
+              <div className="relative w-full max-w-md bg-white rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+                <button 
+                  onClick={() => setShowAddModal(false)}
+                  className="absolute top-6 right-6 h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-black hover:text-white transition-all"
+                >
+                  <LucideX size={20} />
+                </button>
+                
+                <div className="text-center mb-8">
+                  <div className="text-lg font-black mb-1">إضافة حضور يدوياً</div>
+                  <div className="text-xs text-zinc-400">أدخل معرف المستخدم (User ID) لإضافة الحضور</div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-black text-zinc-700 mb-2">معرف المستخدم (User ID)</label>
+                    <input
+                      type="text"
+                      value={addUserId}
+                      onChange={(e) => setAddUserId(e.target.value)}
+                      placeholder="أدخل UUID المستخدم"
+                      className="w-full h-12 rounded-xl border border-black/10 bg-zinc-50 px-4 text-sm outline-none focus:border-black/30"
+                    />
+                  </div>
+
+                  <button
+                    onClick={() => addAttendanceMutation.mutate(addUserId)}
+                    disabled={addAttendanceMutation.isPending || !addUserId}
+                    className="w-full h-12 rounded-xl bg-[#C9A84C] text-[#0D0C0A] font-black text-sm hover:bg-[#E8C97A] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {addAttendanceMutation.isPending ? 'جاري الإضافة...' : 'إضافة الحضور'}
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </AppShell>
       </RoleGate>

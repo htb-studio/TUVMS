@@ -6,7 +6,7 @@ import Link from 'next/link'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import { supabase } from '@/lib/supabaseClient'
-import { LucideAward, LucideCalendar, LucideClock, LucideMapPin, LucideUsers, LucideArrowRight, LucideCheckCircle2, LucideQrCode, LucideAlertCircle, LucideLock } from 'lucide-react'
+import { LucideAward, LucideCalendar, LucideClock, LucideMapPin, LucideUsers, LucideArrowRight, LucideCheckCircle2, LucideQrCode, LucideAlertCircle, LucideLock, LucideXCircle } from 'lucide-react'
 
 const DetailsSkeleton = () => (
   <div className="animate-pulse space-y-6">
@@ -107,6 +107,35 @@ export default function EventDetailsPage() {
     },
     onError: (err: any) => {
       alert('فشل الانضمام: ' + (err.message || 'حدث خطأ غير متوقع'))
+    }
+  })
+
+  const withdraw = useMutation({
+    mutationFn: async () => {
+      if (!confirm('هل أنت متأكد من الانسحاب من هذه الفعالية؟')) {
+        throw new Error('تم الإلغاء')
+      }
+
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
+
+      const { error } = await supabase
+        .from('registrations')
+        .delete()
+        .eq('user_id', session.user.id)
+        .eq('event_id', eventId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['my-registrations-v2'] })
+      qc.invalidateQueries({ queryKey: ['event-availability-v2', eventId] })
+      alert('تم الانسحاب بنجاح')
+    },
+    onError: (err: any) => {
+      if (err.message !== 'تم الإلغاء') {
+        alert('فشل الانسحاب: ' + (err.message || 'حدث خطأ غير متوقع'))
+      }
     }
   })
 
@@ -223,6 +252,15 @@ export default function EventDetailsPage() {
                       <LucideQrCode size={18} />
                       إظهار بطاقة الحضور
                     </Link>
+
+                    <button
+                      onClick={() => withdraw.mutate()}
+                      disabled={withdraw.isPending}
+                      className="w-full h-12 rounded-2xl border border-red-200 bg-red-50 text-red-600 font-black text-sm flex items-center justify-center gap-2 hover:bg-red-100 transition-all active:scale-95 disabled:opacity-50"
+                    >
+                      <LucideXCircle size={18} />
+                      {withdraw.isPending ? 'جاري الانسحاب...' : 'الانسحاب من الفعالية'}
+                    </button>
                   </div>
                 ) : isClosed ? (
                   <div className="flex flex-col items-center justify-center py-8 px-4 rounded-3xl bg-red-50 border border-red-100 text-center">

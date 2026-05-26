@@ -13,40 +13,39 @@ ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1;
 ALTER TABLE public.users 
 ADD COLUMN IF NOT EXISTS total_hours INTEGER DEFAULT 0;
 
--- إنشاء دالة لحساب المستوى بناءً على النقاط
+-- إنشاء دالة لحساب المستوى بناءً على النقاط (نظام مضاعف)
 CREATE OR REPLACE FUNCTION calculate_user_level(points INTEGER)
 RETURNS INTEGER AS $$
 BEGIN
-  -- المستويات من 1 إلى 10
-  -- كل مستوى يتطلب نقاط معينة
+  -- المستويات من 1 إلى 10 - نظام مضاعف
   -- المستوى 1: 0-9 نقاط
   -- المستوى 2: 10-19 نقطة
-  -- المستوى 3: 20-29 نقطة
-  -- المستوى 4: 30-39 نقطة
-  -- المستوى 5: 40-49 نقطة
-  -- المستوى 6: 50-59 نقطة
-  -- المستوى 7: 60-69 نقطة
-  -- المستوى 8: 70-79 نقطة
-  -- المستوى 9: 80-89 نقطة
-  -- المستوى 10: 90+ نقطة
+  -- المستوى 3: 20-39 نقطة (×2)
+  -- المستوى 4: 40-79 نقطة (×2)
+  -- المستوى 5: 80-159 نقطة (×2)
+  -- المستوى 6: 160-319 نقطة (×2)
+  -- المستوى 7: 320-639 نقطة (×2)
+  -- المستوى 8: 640-1279 نقطة (×2)
+  -- المستوى 9: 1280-2559 نقطة (×2)
+  -- المستوى 10: 2560+ نقطة (×2)
   
   IF points < 10 THEN
     RETURN 1;
   ELSIF points < 20 THEN
     RETURN 2;
-  ELSIF points < 30 THEN
-    RETURN 3;
   ELSIF points < 40 THEN
-    RETURN 4;
-  ELSIF points < 50 THEN
-    RETURN 5;
-  ELSIF points < 60 THEN
-    RETURN 6;
-  ELSIF points < 70 THEN
-    RETURN 7;
+    RETURN 3;
   ELSIF points < 80 THEN
+    RETURN 4;
+  ELSIF points < 160 THEN
+    RETURN 5;
+  ELSIF points < 320 THEN
+    RETURN 6;
+  ELSIF points < 640 THEN
+    RETURN 7;
+  ELSIF points < 1280 THEN
     RETURN 8;
-  ELSIF points < 90 THEN
+  ELSIF points < 2560 THEN
     RETURN 9;
   ELSE
     RETURN 10;

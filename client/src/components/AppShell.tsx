@@ -6,11 +6,18 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { LucideLayoutDashboard, LucideCalendar, LucideAward, LucideUser, LucideLogOut } from 'lucide-react'
+import { ThemeProvider } from '@/contexts/ThemeContext'
+import { useTheme } from '@/contexts/ThemeContext'
 
-function itemClass(active: boolean) {
+function itemClass(active: boolean, level: number) {
+  const theme = level >= 6 ? { primary: '#C9A84C', secondary: '#8B6914' } : { primary: '#C9A84C', secondary: '#8B6914' }
   return [
     'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition',
-    active ? 'bg-[#C9A84C]/15 text-[#8B6914]' : 'text-zinc-600 hover:bg-black/[0.03] hover:text-black'
+    active
+      ? `bg-[${theme.primary}]/15 text-[${theme.secondary}]`
+      : level >= 6
+      ? 'text-zinc-400 hover:bg-white/5 hover:text-white'
+      : 'text-zinc-600 hover:bg-black/[0.03] hover:text-black'
   ].join(' ')
 }
 
@@ -25,7 +32,7 @@ export default function AppShell({ title, children }: { title: string; children:
       if (!session) throw new Error('No session')
       const { data, error } = await supabase
         .from('users')
-        .select('full_name, email, role, membership_status')
+        .select('full_name, email, role, membership_status, level')
         .eq('id', session.user.id)
         .single()
       if (error) throw error
@@ -42,6 +49,7 @@ export default function AppShell({ title, children }: { title: string; children:
   }, [me.data, pathname, router])
 
   const role = (me.data?.role ?? 'volunteer') as 'volunteer' | 'organizer' | 'admin'
+  const level = me.data?.level || 1
 
   const nav = [
     { href: '/dashboard', label: 'الرئيسية', icon: LucideLayoutDashboard, show: true },
@@ -62,36 +70,39 @@ export default function AppShell({ title, children }: { title: string; children:
   ]
 
   return (
-    <div className="min-h-screen bg-[#FFFEF9]">
-      {/* Mobile Top Header */}
-      <div className="sticky top-0 z-40 bg-white/80 border-b border-black/5 px-6 py-4 backdrop-blur-md lg:hidden">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-[10px] font-black tracking-widest text-[#8B6914] uppercase">TUVMS</div>
-            <div className="text-lg font-black tracking-tight">{title}</div>
+    <ThemeProvider level={level}>
+      <div className="min-h-screen bg-[#FFFEF9]" style={{ background: level >= 6 ? (level === 10 ? 'linear-gradient(135deg, #1a0a00 0%, #2d1810 50%, #1a0a00 100%)' : level >= 7 ? '#0F0F0F' : '#1a1a1a') : '#FFFEF9' }}>
+        {/* Mobile Top Header */}
+        <div className="sticky top-0 z-40 bg-white/80 border-b border-black/5 px-6 py-4 backdrop-blur-md lg:hidden" style={{ background: level >= 6 ? 'rgba(15,15,15,0.8)' : 'rgba(255,255,255,0.8)', borderColor: level >= 6 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[10px] font-black tracking-widest uppercase" style={{ color: level === 10 ? '#FFD700' : level >= 6 ? '#C9A84C' : '#8B6914' }}>TUVMS</div>
+              <div className="text-lg font-black tracking-tight" style={{ color: level >= 6 ? 'white' : '#0D0C0A' }}>{title}</div>
+            </div>
+            <button
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-black/10 bg-white text-zinc-600 hover:text-red-600"
+              style={{ background: level >= 6 ? 'rgba(255,255,255,0.1)' : 'white', borderColor: level >= 6 ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)', color: level >= 6 ? 'white' : '#737373' }}
+              onClick={async () => {
+                if (confirm('هل تريد تسجيل الخروج؟')) {
+                  await supabase.auth.signOut()
+                  window.location.href = '/'
+                }
+              }}
+            >
+              <LucideLogOut size={20} />
+            </button>
           </div>
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-black/10 bg-white text-zinc-600 hover:text-red-600"
-            onClick={async () => {
-              if (confirm('هل تريد تسجيل الخروج؟')) {
-                await supabase.auth.signOut()
-                window.location.href = '/'
-              }
-            }}
-          >
-            <LucideLogOut size={20} />
-          </button>
         </div>
-      </div>
 
       <div className="mx-auto max-w-6xl px-6 py-6 pb-24 lg:pb-6">
         <div className="hidden lg:mb-10 lg:flex lg:items-center lg:justify-between">
           <div>
-            <div className="text-xs font-bold tracking-[0.3em] text-[#8B6914]">TUVMS — TAIF UNIVERSITY</div>
-            <div className="mt-2 text-4xl font-black tracking-tight">{title}</div>
+            <div className="text-xs font-bold tracking-[0.3em]" style={{ color: level === 10 ? '#FFD700' : level >= 6 ? '#C9A84C' : '#8B6914' }}>TUVMS — TAIF UNIVERSITY</div>
+            <div className="mt-2 text-4xl font-black tracking-tight" style={{ color: level >= 6 ? 'white' : '#0D0C0A' }}>{title}</div>
           </div>
           <button
             className="h-11 rounded-2xl border border-black/10 bg-white px-5 text-sm font-semibold hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all"
+            style={{ background: level >= 6 ? 'rgba(255,255,255,0.1)' : 'white', borderColor: level >= 6 ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)', color: level >= 6 ? 'white' : '#737373' }}
             onClick={async () => {
               await supabase.auth.signOut()
               window.location.href = '/'
@@ -104,15 +115,15 @@ export default function AppShell({ title, children }: { title: string; children:
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block">
-            <div className="sticky top-6 overflow-hidden rounded-[2.5rem] border border-black/10 bg-white shadow-sm">
-              <div className="border-b border-black/5 bg-zinc-50/70 p-6">
+            <div className="sticky top-6 overflow-hidden rounded-[2.5rem] border border-black/10 bg-white shadow-sm" style={{ background: level >= 6 ? 'rgba(255,255,255,0.05)' : 'white', borderColor: level >= 6 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}>
+              <div className="border-b border-black/5 bg-zinc-50/70 p-6" style={{ background: level >= 6 ? 'rgba(255,255,255,0.03)' : 'rgba(249,250,251,0.7)', borderColor: level >= 6 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-2xl bg-[#C9A84C] flex items-center justify-center text-white text-xl font-black">
+                  <div className="h-12 w-12 rounded-2xl flex items-center justify-center text-white text-xl font-black" style={{ background: level === 10 ? 'linear-gradient(135deg, #FFD700, #FFA500)' : level >= 7 ? '#D4AF37' : level >= 6 ? '#C9A84C' : '#C9A84C' }}>
                     {me.data?.full_name?.charAt(0) || 'U'}
                   </div>
                   <div>
-                    <div className="text-sm font-black truncate max-w-[140px]">{me.data?.full_name ?? '—'}</div>
-                    <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                    <div className="text-sm font-black truncate max-w-[140px]" style={{ color: level >= 6 ? 'white' : '#0D0C0A' }}>{me.data?.full_name ?? '—'}</div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: level >= 6 ? 'rgba(255,255,255,0.5)' : '#71717a' }}>
                       {role === 'admin' ? 'أدمن النظام' : role === 'organizer' ? 'منظم فعاليات' : 'متطوع'}
                     </div>
                   </div>
@@ -124,7 +135,7 @@ export default function AppShell({ title, children }: { title: string; children:
                   const Icon = n.icon
                   const active = pathname === n.href
                   return (
-                    <Link key={n.href} href={n.href} className={itemClass(active)}>
+                    <Link key={n.href} href={n.href} className={itemClass(active, level)}>
                       <Icon size={20} strokeWidth={active ? 2.5 : 2} />
                       {n.label}
                     </Link>
@@ -132,8 +143,8 @@ export default function AppShell({ title, children }: { title: string; children:
                 })}
               </nav>
 
-              <div className="mt-4 p-6 border-t border-black/5 bg-zinc-50/50">
-                <p className="text-[10px] text-zinc-400 font-bold leading-relaxed">
+              <div className="mt-4 p-6 border-t border-black/5 bg-zinc-50/50" style={{ borderColor: level >= 6 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', background: level >= 6 ? 'rgba(255,255,255,0.02)' : 'rgba(249,250,251,0.5)' }}>
+                <p className="text-[10px] font-bold leading-relaxed" style={{ color: level >= 6 ? 'rgba(255,255,255,0.4)' : '#a1a1aa' }}>
                   نادي التطوع - جامعة الطائف<br/>
                   الإصدار 2.0.0
                 </p>
@@ -146,7 +157,7 @@ export default function AppShell({ title, children }: { title: string; children:
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-black/5 bg-white/90 p-2 pb-safe-area-inset-bottom backdrop-blur-lg lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-black/5 bg-white/90 p-2 pb-safe-area-inset-bottom backdrop-blur-lg lg:hidden" style={{ background: level >= 6 ? 'rgba(15,15,15,0.9)' : 'rgba(255,255,255,0.9)', borderColor: level >= 6 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
         <div className="flex items-center justify-around">
           {bottomNav.map((n) => {
             const Icon = n.icon
@@ -156,7 +167,7 @@ export default function AppShell({ title, children }: { title: string; children:
                 key={n.href}
                 href={n.href}
                 className={`flex flex-col items-center gap-1 rounded-2xl px-3 py-2 transition-all active:scale-90 ${
-                  active ? 'text-[#8B6914]' : 'text-zinc-400'
+                  active ? (level === 10 ? 'text-[#FFD700]' : level >= 6 ? 'text-[#C9A84C]' : 'text-[#8B6914]') : level >= 6 ? 'text-zinc-400' : 'text-zinc-400'
                 }`}
               >
                 <Icon size={24} strokeWidth={active ? 2.5 : 2} />
@@ -166,6 +177,7 @@ export default function AppShell({ title, children }: { title: string; children:
           })}
         </div>
       </nav>
-    </div>
+      </div>
+    </ThemeProvider>
   )
 }

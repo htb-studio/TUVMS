@@ -16,9 +16,9 @@ function itemClass(active: boolean, level: number) {
   return [
     'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition',
     active
-      ? `bg-[${primaryColor}]/15 text-[${secondaryColor}]`
+      ? `bg-[${primaryColor}]/20 text-[${secondaryColor}]`
       : level >= 6
-      ? 'text-zinc-400 hover:bg-white/5 hover:text-white'
+      ? 'text-zinc-300 hover:bg-white/10 hover:text-white'
       : 'text-zinc-600 hover:bg-black/[0.03] hover:text-black'
   ].join(' ')
 }

@@ -90,59 +90,87 @@ export default function DigitalCardPage() {
       // Background gradient based on theme
       const gradient = ctx.createLinearGradient(0, 0, 800, 500)
       if (level === 10) {
-        gradient.addColorStop(0, '#FFD700')
-        gradient.addColorStop(0.5, '#FFA500')
-        gradient.addColorStop(1, '#FF6B35')
-      } else if (level >= 7) {
-        gradient.addColorStop(0, '#D4AF37')
-        gradient.addColorStop(1, '#8B6914')
-      } else if (level >= 6) {
-        gradient.addColorStop(0, '#C9A84C')
+        gradient.addColorStop(0, '#1a0a00')
+        gradient.addColorStop(0.5, '#2d1810')
+        gradient.addColorStop(1, '#1a0a00')
+      } else if (level === 9) {
+        gradient.addColorStop(0, '#0a0a0a')
+        gradient.addColorStop(1, '#151515')
+      } else if (level === 8) {
+        gradient.addColorStop(0, '#151515')
+        gradient.addColorStop(1, '#1f1f1f')
+      } else if (level === 7) {
+        gradient.addColorStop(0, '#1f1f1f')
+        gradient.addColorStop(1, '#2a2a2a')
+      } else if (level === 6) {
+        gradient.addColorStop(0, '#2a2a2a')
         gradient.addColorStop(1, '#1a1a1a')
+      } else if (level === 5) {
+        gradient.addColorStop(0, '#FFF2C5')
+        gradient.addColorStop(1, '#F5E28F')
+      } else if (level === 4) {
+        gradient.addColorStop(0, '#FFF5D6')
+        gradient.addColorStop(1, '#EAD47E')
+      } else if (level === 3) {
+        gradient.addColorStop(0, '#FFF8E7')
+        gradient.addColorStop(1, '#DFC66C')
+      } else if (level === 2) {
+        gradient.addColorStop(0, '#FFFBF5')
+        gradient.addColorStop(1, '#D4B85C')
       } else {
-        gradient.addColorStop(0, '#1a1a1a')
-        gradient.addColorStop(1, '#0a0a0a')
+        gradient.addColorStop(0, '#FFFFFF')
+        gradient.addColorStop(1, '#C9A84C')
       }
       ctx.fillStyle = gradient
       ctx.fillRect(0, 0, 800, 500)
 
       // Border
-      ctx.strokeStyle = level === 10 ? '#FFD700' : level >= 7 ? '#D4AF37' : '#ffffff20'
+      const borderColor = level === 10 ? '#FFD700' : level === 9 ? '#F0C95C' : level === 8 ? '#E5BE4A' : level === 7 ? '#D4AF37' : level === 6 ? '#C9A84C' : level === 5 ? '#F5E28F' : level === 4 ? '#EAD47E' : level === 3 ? '#DFC66C' : level === 2 ? '#D4B85C' : '#C9A84C'
+      ctx.strokeStyle = borderColor
       ctx.lineWidth = level === 10 ? 12 : 8
       ctx.strokeRect(4, 4, 792, 492)
 
       // Header
-      ctx.fillStyle = '#ffffff40'
+      const headerColor = level >= 6 ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)'
+      ctx.fillStyle = headerColor
       ctx.font = 'bold 14px Arial'
       ctx.fillText('Taif University', 40, 50)
-      ctx.fillStyle = level === 10 ? '#FFD700' : level >= 7 ? '#D4AF37' : '#C9A84C'
+
+      const titleColor = level === 10 ? '#FFD700' : level === 9 ? '#F0C95C' : level === 8 ? '#E5BE4A' : level === 7 ? '#D4AF37' : level === 6 ? '#C9A84C' : level === 5 ? '#8B6914' : level === 4 ? '#8B6914' : level === 3 ? '#8B6914' : level === 2 ? '#8B6914' : '#8B6914'
+      ctx.fillStyle = titleColor
       ctx.font = 'bold 32px Arial'
       ctx.fillText('نادي التطوع', 40, 85)
 
       // User info
-      ctx.fillStyle = '#ffffff'
+      const textColor = level >= 6 ? '#FFFFFF' : '#0D0C0A'
+      const subTextColor = level >= 6 ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'
+      ctx.fillStyle = textColor
       ctx.font = 'bold 24px Arial'
       ctx.fillText(user.full_name || 'المتطوع', 40, 150)
-      ctx.fillStyle = '#ffffff80'
+      ctx.fillStyle = subTextColor
       ctx.font = '16px Arial'
       ctx.fillText(user.email || '', 40, 180)
 
       // Stats
-      ctx.fillStyle = level === 10 ? '#FFD700' : level >= 7 ? '#D4AF37' : '#C9A84C'
+      const statsColor = level === 10 ? '#FFD700' : level === 9 ? '#F0C95C' : level === 8 ? '#E5BE4A' : level === 7 ? '#D4AF37' : level === 6 ? '#C9A84C' : level === 5 ? '#8B6914' : level === 4 ? '#8B6914' : level === 3 ? '#8B6914' : level === 2 ? '#8B6914' : '#8B6914'
+      ctx.fillStyle = statsColor
       ctx.font = 'bold 28px Arial'
       ctx.fillText(`المستوى: ${level} - ${theme.name}`, 40, 250)
       ctx.fillText(`النقاط: ${user.total_points || 0}`, 40, 290)
       ctx.fillText(`الساعات: ${stats.data?.totalHours || 0}`, 40, 330)
 
       // QR Code placeholder
-      ctx.fillStyle = '#ffffff'
+      const qrBgColor = level >= 6 ? '#FFFFFF' : '#FFFFFF'
+      const qrBorderColor = level >= 6 ? borderColor : '#000000'
+      ctx.fillStyle = qrBgColor
       ctx.fillRect(550, 100, 200, 200)
-      ctx.strokeStyle = '#000000'
+      ctx.strokeStyle = qrBorderColor
       ctx.lineWidth = 2
       ctx.strokeRect(550, 100, 200, 200)
-      
+
       // QR Code text
-      ctx.fillStyle = '#000000'
+      const qrTextColor = level >= 6 ? '#000000' : '#000000'
+      ctx.fillStyle = qrTextColor
       ctx.font = 'bold 14px Arial'
       ctx.fillText('QR Code', 600, 200)
       ctx.font = '12px Arial'

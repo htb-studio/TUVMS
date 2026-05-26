@@ -6,6 +6,8 @@ import { Html5QrcodeScanner } from 'html5-qrcode'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import RoleGate from '@/components/RoleGate'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import Toast, { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabaseClient'
 import { LucideScanLine, LucideUser, LucideCalendar, LucidePhone, LucideUniversity, LucideCheckCircle2, LucideXCircle, LucideThumbsUp, LucideThumbsDown, LucideX, LucideCamera, LucideRefreshCw } from 'lucide-react'
 
@@ -40,6 +42,7 @@ export default function ScanAttendancePage() {
 
 function ScanAttendanceBody() {
   const router = useRouter()
+  const toast = useToast()
   const [scanning, setScanning] = useState(true)
   const [scannedUser, setScannedUser] = useState<UserProfile | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null)
@@ -52,6 +55,7 @@ function ScanAttendanceBody() {
   const [success, setSuccess] = useState<string | null>(null)
   const scannerRef = useRef<Html5QrcodeScanner | null>(null)
   const [cameraPermission, setCameraPermission] = useState<boolean | null>(null)
+  const [showCancelDialog, setShowCancelDialog] = useState(false)
 
   useEffect(() => {
     // Load events
@@ -168,10 +172,6 @@ function ScanAttendanceBody() {
       return
     }
 
-    if (!confirm('هل أنت متأكد من إلغاء تحضير هذا المتطوع؟ سيتم حرمانه من الساعات والامتيازات.')) {
-      return
-    }
-
     setLoading(true)
     try {
       const { error } = await supabase
@@ -182,13 +182,14 @@ function ScanAttendanceBody() {
 
       if (error) throw error
 
-      setSuccess('تم إلغاء تحضير المتطوع بنجاح')
-      
+      toast.success('تم إلغاء تحضير المتطوع بنجاح')
+      setShowCancelDialog(false)
+
       setTimeout(() => {
         startScanner()
       }, 2000)
     } catch (e: any) {
-      setError('فشل إلغاء التحضير: ' + e.message)
+      toast.error('فشل إلغاء التحضير: ' + e.message)
     } finally {
       setLoading(false)
     }
@@ -443,7 +444,7 @@ function ScanAttendanceBody() {
 
               {/* Cancel Attendance Button */}
               <button
-                onClick={cancelAttendance}
+                onClick={() => setShowCancelDialog(true)}
                 disabled={loading}
                 className="h-12 w-full rounded-2xl border-2 border-red-500 bg-red-50 text-red-700 text-sm font-extrabold hover:bg-red-100 disabled:opacity-60 disabled:cursor-not-allowed"
               >
@@ -467,6 +468,29 @@ function ScanAttendanceBody() {
             {success}
           </div>
         )}
+
+        {/* Toast Container */}
+        {toast.toasts.map(t => (
+          <Toast
+            key={t.id}
+            type={t.type}
+            message={t.message}
+            onClose={() => toast.removeToast(t.id)}
+          />
+        ))}
+
+        {/* Cancel Attendance Confirm Dialog */}
+        <ConfirmDialog
+          isOpen={showCancelDialog}
+          onClose={() => setShowCancelDialog(false)}
+          onConfirm={cancelAttendance}
+          title="تأكيد إلغاء التحضير"
+          message="هل أنت متأكد من إلغاء تحضير هذا المتطوع؟ سيتم حرمانه من الساعات والامتيازات."
+          confirmText="تأكيد الإلغاء"
+          cancelText="إلغاء"
+          type="danger"
+          loading={loading}
+        />
       </div>
     </AppShell>
   )

@@ -1,10 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import Toast, { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabaseClient'
 import { LucideAward, LucideCalendar, LucideClock, LucideMapPin, LucideUsers, LucideArrowRight, LucideCheckCircle2, LucideQrCode, LucideAlertCircle, LucideLock, LucideXCircle } from 'lucide-react'
 
@@ -23,6 +26,8 @@ export default function EventDetailsPage() {
   const params = useParams<{ eventId: string }>()
   const eventId = params.eventId
   const qc = useQueryClient()
+  const toast = useToast()
+  const [showWithdrawDialog, setShowWithdrawDialog] = useState(false)
 
   const ev = useQuery({
     queryKey: ['event-v2', eventId],
@@ -115,19 +120,15 @@ export default function EventDetailsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['my-registrations-v2'] })
       qc.invalidateQueries({ queryKey: ['event-availability-v2', eventId] })
-      alert('تم الانضمام بنجاح!')
+      toast.success('تم الانضمام بنجاح!')
     },
     onError: (err: any) => {
-      alert('فشل الانضمام: ' + (err.message || 'حدث خطأ غير متوقع'))
+      toast.error('فشل الانضمام: ' + (err.message || 'حدث خطأ غير متوقع'))
     }
   })
 
   const withdraw = useMutation({
     mutationFn: async () => {
-      if (!confirm('هل أنت متأكد من الانسحاب من هذه الفعالية؟ لن تتمكن من إعادة التسجيل.')) {
-        throw new Error('تم الإلغاء')
-      }
-
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('No session')
 
@@ -143,12 +144,11 @@ export default function EventDetailsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['my-registrations-v2'] })
       qc.invalidateQueries({ queryKey: ['event-availability-v2', eventId] })
-      alert('تم الانسحاب بنجاح')
+      toast.success('تم الانسحاب بنجاح')
+      setShowWithdrawDialog(false)
     },
     onError: (err: any) => {
-      if (err.message !== 'تم الإلغاء') {
-        alert('فشل الانسحاب: ' + (err.message || 'حدث خطأ غير متوقع'))
-      }
+      toast.error('فشل الانسحاب: ' + (err.message || 'حدث خطأ غير متوقع'))
     }
   })
 
@@ -267,7 +267,7 @@ export default function EventDetailsPage() {
                     </Link>
 
                     <button
-                      onClick={() => withdraw.mutate()}
+                      onClick={() => setShowWithdrawDialog(true)}
                       disabled={withdraw.isPending}
                       className="w-full h-12 rounded-2xl border border-red-200 bg-red-50 text-red-600 font-black text-sm flex items-center justify-center gap-2 hover:bg-red-100 transition-all active:scale-95 disabled:opacity-50"
                     >
@@ -306,9 +306,9 @@ export default function EventDetailsPage() {
                     onClick={async () => {
                       try {
                         await navigator.clipboard.writeText(window.location.href)
-                        alert('تم نسخ رابط الفعالية!')
+                        toast.success('تم نسخ رابط الفعالية!')
                       } catch {
-                        alert('حدث خطأ أثناء النسخ')
+                        toast.error('حدث خطأ أثناء النسخ')
                       }
                     }}
                     className="mr-auto text-[10px] font-black text-amber-600 hover:underline"
@@ -321,6 +321,29 @@ export default function EventDetailsPage() {
           </div>
 
         </div>
+
+        {/* Toast Container */}
+        {toast.toasts.map(t => (
+          <Toast
+            key={t.id}
+            type={t.type}
+            message={t.message}
+            onClose={() => toast.removeToast(t.id)}
+          />
+        ))}
+
+        {/* Withdraw Confirm Dialog */}
+        <ConfirmDialog
+          isOpen={showWithdrawDialog}
+          onClose={() => setShowWithdrawDialog(false)}
+          onConfirm={() => withdraw.mutate()}
+          title="تأكيد الانسحاب"
+          message="هل أنت متأكد من الانسحاب من هذه الفعالية؟ لن تتمكن من إعادة التسجيل."
+          confirmText="تأكيد الانسحاب"
+          cancelText="إلغاء"
+          type="danger"
+          loading={withdraw.isPending}
+        />
       </AppShell>
     </AuthGate>
   )

@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import RoleGate from '@/components/RoleGate'
+import Toast, { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabaseClient'
 
 type AdminEvent = {
@@ -29,6 +30,7 @@ export default function GodAdminEventSettingsPage() {
   const params = useParams<{ eventId: string }>()
   const eventId = params.eventId
   const qc = useQueryClient()
+  const toast = useToast()
 
   const q = useQuery({
     queryKey: ['admin-event', eventId],
@@ -59,10 +61,10 @@ export default function GodAdminEventSettingsPage() {
       qc.invalidateQueries({ queryKey: ['admin-event', eventId] })
       qc.invalidateQueries({ queryKey: ['admin-events'] })
       qc.invalidateQueries({ queryKey: ['events-v2'] })
-      alert('تم تحديث الإعدادات بنجاح!')
+      toast.success('تم تحديث الإعدادات بنجاح!')
     },
     onError: (err: any) => {
-      alert('فشل التحديث: ' + (err.message || 'خطأ غير معروف'))
+      toast.error('فشل التحديث: ' + (err.message || 'خطأ غير معروف'))
     }
   })
 
@@ -193,6 +195,16 @@ export default function GodAdminEventSettingsPage() {
             </div>
 
           </div>
+
+          {/* Toast Container */}
+          {toast.toasts.map(t => (
+            <Toast
+              key={t.id}
+              type={t.type}
+              message={t.message}
+              onClose={() => toast.removeToast(t.id)}
+            />
+          ))}
         </AppShell>
       </RoleGate>
     </AuthGate>

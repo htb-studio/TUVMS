@@ -6,6 +6,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import RoleGate from '@/components/RoleGate'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import Toast, { useToast } from '@/components/Toast'
 import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
 import { LucideDownload, LucideSearch, LucideUserCheck, LucideUserX, LucideUsers, LucidePlus, LucideTrash2, LucideX } from 'lucide-react'
@@ -122,10 +124,13 @@ export default function OrganizerEventAttendanceReportPage() {
   const params = useParams<{ eventId: string }>()
   const eventId = params.eventId
   const qc = useQueryClient()
+  const toast = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'checked_in' | 'checked_out' | 'not_checked'>('all')
   const [showAddModal, setShowAddModal] = useState(false)
   const [addUserId, setAddUserId] = useState('')
+  const [showRemoveDialog, setShowRemoveDialog] = useState(false)
+  const [userToRemove, setUserToRemove] = useState<string | null>(null)
 
   const q = useQuery({
     queryKey: ['org-att-report', eventId],
@@ -193,20 +198,16 @@ export default function OrganizerEventAttendanceReportPage() {
       qc.invalidateQueries({ queryKey: ['org-att-report', eventId] })
       setShowAddModal(false)
       setAddUserId('')
-      alert('تم إضافة الحضور بنجاح')
+      toast.success('تم إضافة الحضور بنجاح')
     },
     onError: (error: any) => {
-      alert('فشل إضافة الحضور: ' + error.message)
+      toast.error('فشل إضافة الحضور: ' + error.message)
     }
   })
 
   // Mutation to remove attendance
   const removeAttendanceMutation = useMutation({
     mutationFn: async (userId: string) => {
-      if (!confirm('هل أنت متأكد من إلغاء حضور هذا المتطوع؟')) {
-        throw new Error('تم الإلغاء')
-      }
-
       const { error } = await supabase
         .from('attendance')
         .delete()
@@ -217,12 +218,12 @@ export default function OrganizerEventAttendanceReportPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['org-att-report', eventId] })
-      alert('تم إلغاء الحضور بنجاح')
+      toast.success('تم إلغاء الحضور بنجاح')
+      setShowRemoveDialog(false)
+      setUserToRemove(null)
     },
     onError: (error: any) => {
-      if (error.message !== 'تم الإلغاء') {
-        alert('فشل إلغاء الحضور: ' + error.message)
-      }
+      toast.error('فشل إلغاء الحضور: ' + error.message)
     }
   })
 
@@ -260,7 +261,7 @@ export default function OrganizerEventAttendanceReportPage() {
                       a.remove()
                       URL.revokeObjectURL(url)
                     } catch (e: any) {
-                      alert('فشل تصدير الملف: ' + (e.message || 'خطأ غير معروف'))
+                      toast.error('فشل تصدير الملف: ' + (e.message || 'خطأ غير معروف'))
                     }
                   }}
                 >
@@ -391,7 +392,10 @@ export default function OrganizerEventAttendanceReportPage() {
                             <td className="px-6 py-4 text-center">
                               {r.check_in && (
                                 <button
-                                  onClick={() => removeAttendanceMutation.mutate(r.user_id)}
+                                  onClick={() => {
+                                    setUserToRemove(r.user_id)
+                                    setShowRemoveDialog(true)
+                                  }}
                                   className="flex items-center justify-center gap-1 h-8 px-3 rounded-xl bg-red-50 text-red-600 text-[10px] font-black hover:bg-red-100 transition-all"
                                 >
                                   <LucideTrash2 size={12} />
@@ -419,13 +423,13 @@ export default function OrganizerEventAttendanceReportPage() {
           {showAddModal && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-xl bg-black/60 animate-in fade-in duration-300">
               <div className="relative w-full max-w-md bg-white rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
-                <button 
+                <button
                   onClick={() => setShowAddModal(false)}
                   className="absolute top-6 right-6 h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 hover:bg-black hover:text-white transition-all"
                 >
                   <LucideX size={20} />
                 </button>
-                
+
                 <div className="text-center mb-8">
                   <div className="text-lg font-black mb-1">إضافة حضور يدوياً</div>
                   <div className="text-xs text-zinc-400">أدخل معرف المستخدم (User ID) لإضافة الحضور</div>
@@ -454,6 +458,32 @@ export default function OrganizerEventAttendanceReportPage() {
               </div>
             </div>
           )}
+
+          {/* Toast Container */}
+          {toast.toasts.map(t => (
+            <Toast
+              key={t.id}
+              type={t.type}
+              message={t.message}
+              onClose={() => toast.removeToast(t.id)}
+            />
+          ))}
+
+          {/* Remove Attendance Confirm Dialog */}
+          <ConfirmDialog
+            isOpen={showRemoveDialog}
+            onClose={() => {
+              setShowRemoveDialog(false)
+              setUserToRemove(null)
+            }}
+            onConfirm={() => userToRemove && removeAttendanceMutation.mutate(userToRemove)}
+            title="تأكيد إلغاء الحضور"
+            message="هل أنت متأكد من إلغاء حضور هذا المتطوع؟"
+            confirmText="تأكيد الإلغاء"
+            cancelText="إلغاء"
+            type="danger"
+            loading={removeAttendanceMutation.isPending}
+          />
         </AppShell>
       </RoleGate>
     </AuthGate>

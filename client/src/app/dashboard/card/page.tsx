@@ -153,6 +153,12 @@ export default function DigitalCardPage() {
 
       // Stats
       const statsColor = level === 10 ? '#FFD700' : level === 9 ? '#F0C95C' : level === 8 ? '#E5BE4A' : level === 7 ? '#D4AF37' : level === 6 ? '#C9A84C' : level === 5 ? '#8B6914' : level === 4 ? '#8B6914' : level === 3 ? '#8B6914' : level === 2 ? '#8B6914' : '#8B6914'
+      const statsBgColor = level >= 6 ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)'
+
+      // Draw background for stats to improve readability
+      ctx.fillStyle = statsBgColor
+      ctx.fillRect(30, 220, 300, 130)
+
       ctx.fillStyle = statsColor
       ctx.font = 'bold 28px Arial'
       ctx.fillText(`المستوى: ${level} - ${theme.name}`, 40, 250)

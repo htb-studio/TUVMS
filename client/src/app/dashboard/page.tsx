@@ -132,7 +132,7 @@ export default function DashboardPage() {
                 </div>
                 <span className="text-[11px] font-black text-zinc-400 uppercase tracking-wider">ساعات التطوع</span>
               </div>
-              <div className="text-3xl font-black">{stats.data?.totalHours ?? 0}</div>
+              <div className="text-3xl font-black text-[#0D0C0A]">{stats.data?.totalHours ?? 0}</div>
               <div className="mt-1 text-xs text-zinc-500 font-medium">ساعة مسجلة</div>
             </div>
 
@@ -143,7 +143,7 @@ export default function DashboardPage() {
                 </div>
                 <span className="text-[11px] font-black text-zinc-400 uppercase tracking-wider">الأوسمة</span>
               </div>
-              <div className="text-3xl font-black">{stats.data?.badgesCount ?? 0}</div>
+              <div className="text-3xl font-black text-[#0D0C0A]">{stats.data?.badgesCount ?? 0}</div>
               <div className="mt-1 text-xs text-zinc-500 font-medium">وسام استحقاق</div>
             </div>
 
@@ -156,7 +156,7 @@ export default function DashboardPage() {
                   <span className="text-[11px] font-black text-zinc-400 uppercase tracking-wider">الفعاليات</span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-black">{stats.data?.eventsCount ?? 0}</span>
+                  <span className="text-3xl font-black text-[#0D0C0A]">{stats.data?.eventsCount ?? 0}</span>
                   <span className="text-xs text-zinc-500 font-medium">تم التسجيل فيها</span>
                 </div>
               </div>

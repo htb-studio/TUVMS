@@ -70,7 +70,7 @@ export default function WalletPage() {
                 <LucideMedal className="text-amber-500" />
                 الأوسمة المستحقة
               </h3>
-              <span className="text-xs font-bold text-zinc-400 bg-zinc-100 px-3 py-1 rounded-full">
+              <span className="text-xs font-bold text-[#0D0C0A] bg-zinc-100 px-3 py-1 rounded-full">
                 {badges?.length || 0} أوسمة
               </span>
             </div>

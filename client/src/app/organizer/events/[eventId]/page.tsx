@@ -93,7 +93,7 @@ export default function OrganizerEventDetailsPage() {
       <RoleGate allow={['organizer', 'admin']}>
         <AppShell title="تفاصيل الفعالية">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <Link href="/organizer" className="text-sm text-zinc-600 hover:text-black">
+            <Link href="/organizer" className="text-sm text-zinc-700 hover:text-black">
               ← رجوع
             </Link>
             <div className="flex flex-wrap gap-2">
@@ -132,7 +132,7 @@ export default function OrganizerEventDetailsPage() {
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <div className="text-3xl font-black tracking-tight">{q.data.title}</div>
-                    <div className="mt-2 text-sm text-zinc-600">{q.data.description ?? 'بدون وصف'}</div>
+                    <div className="mt-2 text-sm text-zinc-700">{q.data.description ?? 'بدون وصف'}</div>
                   </div>
                   <div className="rounded-2xl border border-black/10 bg-white px-4 py-2 text-xs font-semibold text-zinc-700">
                     ملكية: منظم الفعالية
@@ -146,15 +146,15 @@ export default function OrganizerEventDetailsPage() {
                 <>
                   <div className="grid gap-3 sm:grid-cols-3">
                     <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                      <div className="text-xs text-zinc-500">السعة</div>
+                      <div className="text-xs text-zinc-700">السعة</div>
                       <div className="mt-1 text-lg font-extrabold">{q.data.capacity ?? 0}</div>
                     </div>
                     <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                      <div className="text-xs text-zinc-500">البداية</div>
+                      <div className="text-xs text-zinc-700">البداية</div>
                       <div className="mt-1 font-mono text-xs text-zinc-700">{q.data.start_time ?? '—'}</div>
                     </div>
                     <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                      <div className="text-xs text-zinc-500">النهاية</div>
+                      <div className="text-xs text-zinc-700">النهاية</div>
                       <div className="mt-1 font-mono text-xs text-zinc-700">{q.data.end_time ?? '—'}</div>
                     </div>
                   </div>
@@ -164,7 +164,7 @@ export default function OrganizerEventDetailsPage() {
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
                           <div className="text-sm font-extrabold">رابط التحضير للحضور</div>
-                          <div className="mt-1 text-sm text-zinc-600">شاركه فقط مع فريق التنظيم.</div>
+                          <div className="mt-1 text-sm text-zinc-700">شاركه فقط مع فريق التنظيم.</div>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           <a
@@ -197,7 +197,7 @@ export default function OrganizerEventDetailsPage() {
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       <div>
                         <div className="text-sm font-extrabold">ملخص الحضور</div>
-                        <div className="mt-1 text-sm text-zinc-600">آخر تسجيلات الدخول/الانصراف لهذه الفعالية.</div>
+                        <div className="mt-1 text-sm text-zinc-700">آخر تسجيلات الدخول/الانصراف لهذه الفعالية.</div>
                       </div>
                       <Link
                         href={`/organizer/events/${eventId}/attendance`}
@@ -229,21 +229,21 @@ export default function OrganizerEventDetailsPage() {
                       <>
                         <div className="mt-4 grid gap-3 sm:grid-cols-3">
                           <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                            <div className="text-xs text-zinc-500">الإجمالي</div>
+                            <div className="text-xs text-zinc-700">الإجمالي</div>
                             <div className="mt-1 text-2xl font-extrabold">{attendance.data.stats.total}</div>
                           </div>
                           <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                            <div className="text-xs text-zinc-500">دخول</div>
+                            <div className="text-xs text-zinc-700">دخول</div>
                             <div className="mt-1 text-2xl font-extrabold">{attendance.data.stats.checked_in}</div>
                           </div>
                           <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                            <div className="text-xs text-zinc-500">انصراف</div>
+                            <div className="text-xs text-zinc-700">انصراف</div>
                             <div className="mt-1 text-2xl font-extrabold">{attendance.data.stats.checked_out}</div>
                           </div>
                         </div>
 
                         <div className="mt-6 overflow-hidden rounded-3xl border border-black/10">
-                          <div className="grid grid-cols-[1.2fr_1fr_1fr] gap-3 border-b border-black/10 bg-zinc-50 px-4 py-3 text-xs font-bold text-zinc-600">
+                          <div className="grid grid-cols-[1.2fr_1fr_1fr] gap-3 border-b border-black/10 bg-zinc-50 px-4 py-3 text-xs font-bold text-zinc-700">
                             <div>المتطوع</div>
                             <div>الدخول</div>
                             <div>الانصراف</div>
@@ -256,7 +256,7 @@ export default function OrganizerEventDetailsPage() {
                             >
                               <div>
                                 <div className="font-semibold">{r.user_full_name ?? '—'}</div>
-                                <div className="text-xs text-zinc-500">{r.user_email ?? ''}</div>
+                                <div className="text-xs text-zinc-700">{r.user_email ?? ''}</div>
                               </div>
                               <div className="font-mono text-xs text-zinc-700">{r.check_in ?? '—'}</div>
                               <div className="font-mono text-xs text-zinc-700">{r.check_out ?? '—'}</div>
@@ -264,7 +264,7 @@ export default function OrganizerEventDetailsPage() {
                           ))}
 
                           {attendance.data.rows.length === 0 && (
-                            <div className="px-4 py-4 text-sm text-zinc-600 bg-white">لا يوجد حضور بعد.</div>
+                            <div className="px-4 py-4 text-sm text-zinc-700 bg-white">لا يوجد حضور بعد.</div>
                           )}
                         </div>
                       </>
@@ -278,7 +278,7 @@ export default function OrganizerEventDetailsPage() {
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
             <div className="rounded-3xl border border-black/10 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(0,0,0,0.35)]">
               <div className="text-lg font-extrabold">اختصارات</div>
-              <div className="mt-2 text-sm text-zinc-600">كل ما تحتاجه لإدارة الفعالية بسرعة.</div>
+              <div className="mt-2 text-sm text-zinc-700">كل ما تحتاجه لإدارة الفعالية بسرعة.</div>
               <div className="mt-5 flex flex-wrap gap-2">
                 <Link
                   href={`/organizer/events/${eventId}/attendance`}
@@ -297,7 +297,7 @@ export default function OrganizerEventDetailsPage() {
 
             <div className="rounded-3xl border border-black/10 bg-white p-6 shadow-[0_18px_50px_-40px_rgba(0,0,0,0.35)]">
               <div className="text-lg font-extrabold">ملاحظة أمنية</div>
-              <div className="mt-2 text-sm text-zinc-600">رابط التحضير مخصص لفريق التنظيم فقط. يرجى عدم مشاركته خارج الفريق.</div>
+              <div className="mt-2 text-sm text-zinc-700">رابط التحضير مخصص لفريق التنظيم فقط. يرجى عدم مشاركته خارج الفريق.</div>
             </div>
           </div>
         </AppShell>

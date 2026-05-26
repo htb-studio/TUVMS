@@ -213,7 +213,7 @@ function AdminUserBody() {
   return (
     <AppShell title="ملف العضو">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <Link href="/godadmimtuvms" className="text-sm text-zinc-600 hover:text-black">
+        <Link href="/godadmimtuvms" className="text-sm text-zinc-700 hover:text-black">
           ← رجوع
         </Link>
       </div>
@@ -221,7 +221,7 @@ function AdminUserBody() {
       <div className="mt-6 overflow-hidden rounded-3xl border border-black/10 bg-white shadow-[0_18px_50px_-40px_rgba(0,0,0,0.35)]">
         <div className="border-b border-black/5 bg-zinc-50/70 p-6">
           <h1 className="text-3xl font-black tracking-tight">ملف العضو</h1>
-          <p className="mt-2 text-sm text-zinc-600">عرض بيانات العضو + إدارة الحالة + رابط إعادة تعيين كلمة المرور.</p>
+          <p className="mt-2 text-sm text-zinc-700">عرض بيانات العضو + إدارة الحالة + رابط إعادة تعيين كلمة المرور.</p>
         </div>
 
         <div className="p-6">
@@ -238,27 +238,27 @@ function AdminUserBody() {
 
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                      <div className="text-xs text-zinc-500">الاسم</div>
+                      <div className="text-xs text-zinc-700">الاسم</div>
                       <div className="mt-1 text-sm font-bold">{user.data.full_name ?? '—'}</div>
                     </div>
                     <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                      <div className="text-xs text-zinc-500">البريد</div>
+                      <div className="text-xs text-zinc-700">البريد</div>
                       <div className="mt-1 text-sm font-bold break-all">{user.data.email ?? '—'}</div>
                     </div>
                     <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                      <div className="text-xs text-zinc-500">رقم الجوال</div>
+                      <div className="text-xs text-zinc-700">رقم الجوال</div>
                       <div className="mt-1 text-sm font-bold">{user.data.phone ?? '—'}</div>
                     </div>
                     <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                      <div className="text-xs text-zinc-500">الرقم الجامعي</div>
+                      <div className="text-xs text-zinc-700">الرقم الجامعي</div>
                       <div className="mt-1 text-sm font-bold">{user.data.university_id ?? '—'}</div>
                     </div>
                     <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                      <div className="text-xs text-zinc-500">رقم الهوية</div>
+                      <div className="text-xs text-zinc-700">رقم الهوية</div>
                       <div className="mt-1 text-sm font-bold">{user.data.national_id ?? '—'}</div>
                     </div>
                     <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                      <div className="text-xs text-zinc-500">الحالة</div>
+                      <div className="text-xs text-zinc-700">الحالة</div>
                       <div className="mt-1 text-sm font-bold">{user.data.membership_status ?? '—'}</div>
                     </div>
                   </div>
@@ -295,7 +295,7 @@ function AdminUserBody() {
                 <div className="mt-6 overflow-hidden rounded-3xl border border-black/10 bg-white">
                   <div className="border-b border-black/5 bg-zinc-50/70 p-6">
                     <div className="text-lg font-black">الفعاليات التي حضرها</div>
-                    <div className="mt-2 text-sm text-zinc-600">حسب جدول الحضور.</div>
+                    <div className="mt-2 text-sm text-zinc-700">حسب جدول الحضور.</div>
                   </div>
                   <div className="p-6">
                     {attendance.isLoading && <div className="text-sm text-zinc-600">جاري تحميل السجل…</div>}
@@ -314,15 +314,15 @@ function AdminUserBody() {
                             <div className="text-sm font-extrabold">{r.event?.title ?? r.event_id}</div>
                             <div className="mt-2 grid gap-2 sm:grid-cols-3">
                               <div className="rounded-2xl border border-black/10 bg-zinc-50 p-3">
-                                <div className="text-xs text-zinc-500">الدخول</div>
+                                <div className="text-xs text-zinc-700">الدخول</div>
                                 <div className="mt-1 font-mono text-xs text-zinc-700">{r.check_in ?? '—'}</div>
                               </div>
                               <div className="rounded-2xl border border-black/10 bg-zinc-50 p-3">
-                                <div className="text-xs text-zinc-500">الانصراف</div>
+                                <div className="text-xs text-zinc-700">الانصراف</div>
                                 <div className="mt-1 font-mono text-xs text-zinc-700">{r.check_out ?? '—'}</div>
                               </div>
                               <div className="rounded-2xl border border-black/10 bg-zinc-50 p-3">
-                                <div className="text-xs text-zinc-500">آخر تحديث</div>
+                                <div className="text-xs text-zinc-700">آخر تحديث</div>
                                 <div className="mt-1 font-mono text-xs text-zinc-700">{r.created_at ?? '—'}</div>
                               </div>
                             </div>
@@ -337,10 +337,10 @@ function AdminUserBody() {
               <div className="overflow-hidden rounded-3xl border border-black/10 bg-white">
                 <div className="border-b border-black/5 bg-zinc-50/70 p-6">
                   <div className="text-lg font-black">إدارة العضو</div>
-                  <div className="mt-2 text-sm text-zinc-600">إجراءات خاصة بالأدمن فقط.</div>
+                  <div className="mt-2 text-sm text-zinc-700">إجراءات خاصة بالأدمن فقط.</div>
                 </div>
                 <div className="p-6">
-                  <div className="text-xs font-bold text-zinc-600">تغيير حالة الحساب</div>
+                  <div className="text-xs font-bold text-zinc-700">تغيير حالة الحساب</div>
                   <div className="mt-3 grid gap-2">
                     <button
                       type="button"
@@ -401,7 +401,7 @@ function AdminUserBody() {
             </div>
 
             <div className="mt-6">
-              <div className="text-xs font-bold text-zinc-600">منح وسام موجود</div>
+              <div className="text-xs font-bold text-zinc-700">منح وسام موجود</div>
               <div className="mt-3 grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
                 {allBadges.data?.map(b => (
                   <button
@@ -416,7 +416,7 @@ function AdminUserBody() {
               </div>
 
               <div className="mt-8 pt-6 border-t border-black/5">
-                <div className="text-xs font-bold text-zinc-600">إنشاء وسام جديد</div>
+                <div className="text-xs font-bold text-zinc-700">إنشاء وسام جديد</div>
                 <div className="mt-3 space-y-2">
                   <div className="flex gap-2">
                     <input 

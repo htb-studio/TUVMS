@@ -250,7 +250,7 @@ export default function EventAttendancePrepPage() {
       <RoleGate allow={['organizer', 'admin']}>
         <AppShell title="تحضير الحضور">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <Link href={`/organizer/events/${eventId}`} className="text-sm text-zinc-600 hover:text-black">
+            <Link href={`/organizer/events/${eventId}`} className="text-sm text-zinc-700 hover:text-black">
               ← رجوع
             </Link>
 
@@ -287,7 +287,7 @@ export default function EventAttendancePrepPage() {
             <div className="overflow-hidden rounded-3xl border border-black/10 bg-white shadow-[0_18px_50px_-40px_rgba(0,0,0,0.35)]">
               <div className="border-b border-black/5 bg-zinc-50/70 p-6">
                 <div className="text-lg font-black">الماسح</div>
-                <div className="mt-2 text-sm text-zinc-600">وجّه الكاميرا على QR الخاص بالمتطوع.</div>
+                <div className="mt-2 text-sm text-zinc-700">وجّه الكاميرا على QR الخاص بالمتطوع.</div>
               </div>
               <div className="p-6">
                 <div className="overflow-hidden rounded-3xl border border-black/10 bg-zinc-50">
@@ -296,7 +296,7 @@ export default function EventAttendancePrepPage() {
 
                 <div className="mt-4 rounded-3xl border border-black/10 bg-white p-4">
                   <div className="text-sm font-extrabold">إدخال يدوي</div>
-                  <div className="mt-2 text-sm text-zinc-600">الصق محتوى QR (JSON) أو استخدم ماسح ضوئي.</div>
+                  <div className="mt-2 text-sm text-zinc-700">الصق محتوى QR (JSON) أو استخدم ماسح ضوئي.</div>
                   <textarea
                     className="mt-3 min-h-[110px] w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-black/30"
                     value={manualPayload}
@@ -329,7 +329,7 @@ export default function EventAttendancePrepPage() {
                 </div>
 
                 {status === 'starting' && (
-                  <div className="mt-4 rounded-3xl border border-black/10 bg-white p-4 text-sm text-zinc-600">جاري تشغيل الكاميرا…</div>
+                  <div className="mt-4 rounded-3xl border border-black/10 bg-white p-4 text-sm text-zinc-700">جاري تشغيل الكاميرا…</div>
                 )}
 
                 {error && (
@@ -362,13 +362,13 @@ export default function EventAttendancePrepPage() {
             <div className="overflow-hidden rounded-3xl border border-black/10 bg-white shadow-[0_18px_50px_-40px_rgba(0,0,0,0.35)]">
               <div className="border-b border-black/5 bg-zinc-50/70 p-6">
                 <div className="text-lg font-black">سجل مباشر</div>
-                <div className="mt-2 text-sm text-zinc-600">آخر العمليات (تحديث فوري داخل نفس الصفحة).</div>
+                <div className="mt-2 text-sm text-zinc-700">آخر العمليات (تحديث فوري داخل نفس الصفحة).</div>
               </div>
               <div className="p-6">
                 {log.length === 0 && (
                   <div className="rounded-3xl border border-black/10 bg-white p-10 text-center">
                     <div className="text-lg font-extrabold">لا يوجد سجل بعد</div>
-                    <div className="mt-2 text-sm text-zinc-600">ابدأ المسح لتظهر النتائج هنا.</div>
+                    <div className="mt-2 text-sm text-zinc-700">ابدأ المسح لتظهر النتائج هنا.</div>
                   </div>
                 )}
 

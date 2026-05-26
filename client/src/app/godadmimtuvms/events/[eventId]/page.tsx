@@ -79,7 +79,7 @@ export default function GodAdminEventSettingsPage() {
         <AppShell title="إعدادات الفعالية">
           <div className="space-y-6 pb-24">
             
-            <Link href="/godadmimtuvms" className="inline-flex items-center gap-2 text-sm font-black text-zinc-400 hover:text-black transition-colors px-2">
+            <Link href="/godadmimtuvms" className="inline-flex items-center gap-2 text-sm font-black text-zinc-700 hover:text-black transition-colors px-2">
               <LucideArrowRight size={18} className="rotate-180" />
               العودة للوحة الإدارة
             </Link>
@@ -103,7 +103,7 @@ export default function GodAdminEventSettingsPage() {
                     </div>
                     <div>
                       <div className="text-sm font-black">ظهور الفعالية</div>
-                      <div className="text-[10px] font-bold text-zinc-400 uppercase">{event.is_visible !== false ? 'ظاهرة للمتطوعين' : 'مخفية عن الجميع'}</div>
+                      <div className="text-[10px] font-bold text-zinc-700 uppercase">{event.is_visible !== false ? 'ظاهرة للمتطوعين' : 'مخفية عن الجميع'}</div>
                     </div>
                   </div>
                   <button
@@ -124,7 +124,7 @@ export default function GodAdminEventSettingsPage() {
                     </div>
                     <div>
                       <div className="text-sm font-black">حالة التسجيل</div>
-                      <div className="text-[10px] font-bold text-zinc-400 uppercase">{event.is_closed ? 'مغلق حالياً' : 'مفتوح للتسجيل'}</div>
+                      <div className="text-[10px] font-bold text-zinc-700 uppercase">{event.is_closed ? 'مغلق حالياً' : 'مفتوح للتسجيل'}</div>
                     </div>
                   </div>
                   <button
@@ -147,7 +147,7 @@ export default function GodAdminEventSettingsPage() {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-2 px-1">نوع الفعالية</label>
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase mb-2 px-1">نوع الفعالية</label>
                     <select
                       className="w-full h-14 rounded-2xl border border-black/5 bg-zinc-50 px-4 text-sm font-bold focus:bg-white focus:border-[#C9A84C]/50 transition-all outline-none"
                       value={event.type || 'general'}
@@ -160,7 +160,7 @@ export default function GodAdminEventSettingsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-2 px-1">وسم الفعالية (Admin Tag)</label>
+                    <label className="block text-[10px] font-bold text-zinc-700 uppercase mb-2 px-1">وسم الفعالية (Admin Tag)</label>
                     <input
                       className="w-full h-14 rounded-2xl border border-black/5 bg-zinc-50 px-4 text-sm font-bold focus:bg-white focus:border-[#C9A84C]/50 transition-all outline-none"
                       placeholder="مثال: فعالية كبرى، حضور إلزامي..."
@@ -178,18 +178,18 @@ export default function GodAdminEventSettingsPage() {
                     defaultValue={event.location || ''}
                     onBlur={(e) => update.mutate({ location: e.target.value })}
                   />
-                  <p className="mt-2 text-[10px] text-zinc-400 font-medium">حدد الموقع الدقيق للفعالية</p>
+                  <p className="mt-2 text-[10px] text-zinc-700 font-medium">حدد الموقع الدقيق للفعالية</p>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-2 px-1">نص الشهادة / التعليمات</label>
+                  <label className="block text-[10px] font-bold text-zinc-700 uppercase mb-2 px-1">نص الشهادة / التعليمات</label>
                   <textarea
                     className="w-full min-h-[150px] rounded-2xl border border-black/5 bg-zinc-50 p-4 text-sm font-medium focus:bg-white focus:border-[#C9A84C]/50 transition-all outline-none resize-none"
                     placeholder="اكتب التعليمات التي ستظهر للمتطوعين بعد التسجيل..."
                     defaultValue={event.certificate_text || ''}
                     onBlur={(e) => update.mutate({ certificate_text: e.target.value })}
                   />
-                  <p className="mt-2 text-[10px] text-zinc-400 font-medium">سيظهر هذا النص فقط للمتطوعين الذين أتموا عملية التسجيل بنجاح.</p>
+                  <p className="mt-2 text-[10px] text-zinc-700 font-medium">سيظهر هذا النص فقط للمتطوعين الذين أتموا عملية التسجيل بنجاح.</p>
                 </div>
               </div>
             </div>

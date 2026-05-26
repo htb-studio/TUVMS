@@ -233,7 +233,7 @@ export default function OrganizerEventAttendanceReportPage() {
         <AppShell title="إدارة الحضور">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Link href={`/organizer/events/${eventId}`} className="text-sm font-bold text-zinc-600 hover:text-black">
+              <Link href={`/organizer/events/${eventId}`} className="text-sm font-bold text-zinc-700 hover:text-black">
                 ← العودة للفعالية
               </Link>
             </div>
@@ -296,28 +296,28 @@ export default function OrganizerEventAttendanceReportPage() {
                     <LucideUsers size={20} />
                     <span className="text-xs font-bold uppercase tracking-wider">إجمالي المسجلين</span>
                   </div>
-                  <div className="mt-2 text-3xl font-black">{q.data?.stats.total ?? 0}</div>
+                  <div className="mt-2 text-3xl font-black text-[#0D0C0A]">{q.data?.stats.total ?? 0}</div>
                 </div>
                 <div className="rounded-3xl border border-black/10 bg-white p-6 shadow-sm">
                   <div className="flex items-center gap-3 text-emerald-600">
                     <LucideUserCheck size={20} />
                     <span className="text-xs font-bold uppercase tracking-wider">تم التحضير</span>
                   </div>
-                  <div className="mt-2 text-3xl font-black">{q.data?.stats.checked_in ?? 0}</div>
+                  <div className="mt-2 text-3xl font-black text-[#0D0C0A]">{q.data?.stats.checked_in ?? 0}</div>
                 </div>
                 <div className="rounded-3xl border border-black/10 bg-white p-6 shadow-sm">
                   <div className="flex items-center gap-3 text-blue-600">
                     <LucideUserCheck size={20} />
                     <span className="text-xs font-bold uppercase tracking-wider">تم الانصراف</span>
                   </div>
-                  <div className="mt-2 text-3xl font-black">{q.data?.stats.checked_out ?? 0}</div>
+                  <div className="mt-2 text-3xl font-black text-[#0D0C0A]">{q.data?.stats.checked_out ?? 0}</div>
                 </div>
                 <div className="rounded-3xl border border-black/10 bg-white p-6 shadow-sm">
                   <div className="flex items-center gap-3 text-red-500">
                     <LucideUserX size={20} />
                     <span className="text-xs font-bold uppercase tracking-wider">لم يحضروا</span>
                   </div>
-                  <div className="mt-2 text-3xl font-black">{(q.data?.stats.total ?? 0) - (q.data?.stats.checked_in ?? 0)}</div>
+                  <div className="mt-2 text-3xl font-black text-[#0D0C0A]">{(q.data?.stats.total ?? 0) - (q.data?.stats.checked_in ?? 0)}</div>
                 </div>
               </div>
 
@@ -326,7 +326,7 @@ export default function OrganizerEventAttendanceReportPage() {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                       <div className="text-xl font-black tracking-tight">قائمة الحضور والتفاصيل</div>
-                      <div className="mt-1 text-sm text-zinc-500">البحث والفلترة اللحظية للمتطوعين.</div>
+                      <div className="mt-1 text-sm text-zinc-700">البحث والفلترة اللحظية للمتطوعين.</div>
                     </div>
                     
                     <div className="flex flex-wrap items-center gap-2">
@@ -357,7 +357,7 @@ export default function OrganizerEventAttendanceReportPage() {
                 <div className="p-0 overflow-x-auto">
                   <table className="w-full text-right border-collapse">
                     <thead>
-                      <tr className="border-b border-black/5 bg-zinc-50/30 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                      <tr className="border-b border-black/5 bg-zinc-50/30 text-[10px] font-black text-zinc-700 uppercase tracking-widest">
                         <th className="px-6 py-4">المتطوع</th>
                         <th className="px-6 py-4 text-center">الحالة</th>
                         <th className="px-6 py-4 text-center">إجراءات</th>
@@ -368,7 +368,7 @@ export default function OrganizerEventAttendanceReportPage() {
                     <tbody className="divide-y divide-black/5">
                       {filteredRows.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="py-20 text-center text-sm text-zinc-400 font-bold">
+                          <td colSpan={5} className="py-20 text-center text-sm text-zinc-700 font-bold">
                             لا توجد نتائج تطابق بحثك.
                           </td>
                         </tr>
@@ -377,7 +377,7 @@ export default function OrganizerEventAttendanceReportPage() {
                           <tr key={r.user_id} className="hover:bg-zinc-50/50 transition-colors">
                             <td className="px-6 py-4">
                               <div className="font-black text-zinc-900">{r.user_full_name ?? '—'}</div>
-                              <div className="text-[10px] text-zinc-500 mt-0.5">{r.user_email}</div>
+                              <div className="text-[10px] text-zinc-700 mt-0.5">{r.user_email}</div>
                             </td>
                             <td className="px-6 py-4 text-center">
                               <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-black uppercase ${
@@ -403,10 +403,10 @@ export default function OrganizerEventAttendanceReportPage() {
                                 </button>
                               )}
                             </td>
-                            <td className="px-6 py-4 text-xs font-mono text-zinc-500">
+                            <td className="px-6 py-4 text-xs font-mono text-zinc-700">
                               {r.check_in ? new Date(r.check_in).toLocaleTimeString('ar-SA') : '—'}
                             </td>
-                            <td className="px-6 py-4 text-xs font-mono text-zinc-500">
+                            <td className="px-6 py-4 text-xs font-mono text-zinc-700">
                               {r.check_out ? new Date(r.check_out).toLocaleTimeString('ar-SA') : '—'}
                             </td>
                           </tr>

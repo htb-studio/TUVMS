@@ -67,7 +67,7 @@ export default function EventQrPage() {
     <AuthGate title="الرجاء تسجيل الدخول">
       <AppShell title="رمز الحضور">
         <div className="flex items-center justify-between gap-4">
-          <Link href={`/events/${eventId}`} className="group flex items-center gap-2 text-sm font-bold text-zinc-600 hover:text-black transition-colors">
+          <Link href={`/events/${eventId}`} className="group flex items-center gap-2 text-sm font-bold text-zinc-700 hover:text-black transition-colors">
             <span className="group-hover:-translate-x-1 transition-transform">→</span>
             رجوع للفعالية
           </Link>
@@ -82,7 +82,7 @@ export default function EventQrPage() {
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-black text-[#0D0C0A]">رمز الحضور الآمن</h3>
-                <p className="mt-2 text-sm text-zinc-600 leading-relaxed">
+                <p className="mt-2 text-sm text-zinc-700 leading-relaxed">
                   هذا الرمز فريد خاص بك لهذه الفعالية. اعرضه للمنظم عند الوصول للحصول على تأكيد الحضور.
                   لا يمكن استخدام هذا الرمز لأي فعالية أخرى.
                 </p>
@@ -96,7 +96,7 @@ export default function EventQrPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-black text-[#0D0C0A]">رمز الاستجابة السريعة</h2>
-                  <p className="mt-1 text-sm text-zinc-500">QR Code</p>
+                  <p className="mt-1 text-sm text-zinc-700">QR Code</p>
                 </div>
                 <div className="h-12 w-12 rounded-2xl bg-[#C9A84C]/10 flex items-center justify-center">
                   <LucideQrCode size={24} className="text-[#C9A84C]" />
@@ -138,7 +138,7 @@ export default function EventQrPage() {
                           <LucideCalendar size={18} className="text-[#C9A84C]" />
                         </div>
                         <div>
-                          <div className="text-[10px] font-bold text-zinc-400 uppercase">تاريخ التسجيل</div>
+                          <div className="text-[10px] font-bold text-zinc-700 uppercase">تاريخ التسجيل</div>
                           <div className="text-sm font-black text-zinc-700">
                             {q.data.payload.created_at ? new Date(q.data.payload.created_at).toLocaleDateString('ar-SA') : '—'}
                           </div>
@@ -151,7 +151,7 @@ export default function EventQrPage() {
                           <LucideClock size={18} className="text-[#C9A84C]" />
                         </div>
                         <div>
-                          <div className="text-[10px] font-bold text-zinc-400 uppercase">وقت التسجيل</div>
+                          <div className="text-[10px] font-bold text-zinc-700 uppercase">وقت التسجيل</div>
                           <div className="text-sm font-black text-zinc-700">
                             {q.data.payload.created_at ? new Date(q.data.payload.created_at).toLocaleTimeString('ar-SA') : '—'}
                           </div>
@@ -180,7 +180,7 @@ export default function EventQrPage() {
 
                   {/* Help Text */}
                   <div className="rounded-2xl border border-[#C9A84C]/20 bg-[#C9A84C]/5 p-4">
-                    <p className="text-xs text-zinc-600 leading-relaxed text-center">
+                    <p className="text-xs text-zinc-700 leading-relaxed text-center">
                       <span className="font-bold text-[#C9A84C]">نصيحة:</span> احفظ صورة الرمز كاحتياطي في حال واجهت مشكلة في الاتصال.
                       يمكنك طلب إعادة المسح من المنظم إذا لزم الأمر.
                     </p>

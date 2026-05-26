@@ -5,8 +5,9 @@ import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import { LucideAward, LucideCalendar, LucideChevronLeft, LucideClock, LucideFileCheck, LucideTrophy } from 'lucide-react'
+import '@/styles/themes.css'
 
 export default function DashboardPage() {
   const stats = useQuery({
@@ -49,21 +50,55 @@ export default function DashboardPage() {
 
   const role = useMemo(() => (me.data?.role ?? 'volunteer') as 'volunteer' | 'organizer' | 'admin', [me.data?.role])
 
+  // Calculate level and progress
+  const level = me.data?.level || 1
+  const totalPoints = me.data?.total_points || 0
+  const pointsForNextLevel = level * 10
+  const pointsInCurrentLevel = totalPoints % 10
+  const progressPercent = (pointsInCurrentLevel / 10) * 100
+
+  // Apply theme based on level
+  useEffect(() => {
+    if (me.data?.level) {
+      document.body.setAttribute('data-theme-level', String(me.data.level))
+    }
+  }, [me.data?.level])
+
   return (
     <AuthGate title="الرجاء تسجيل الدخول">
       <AppShell title="لوحة التحكم">
         <div className="space-y-6 pb-20">
-          {/* Welcome Card - Modern Gradient */}
+          {/* Welcome Card - Modern Gradient with Level Progress */}
           <div className="relative overflow-hidden rounded-[2.5rem] border border-black/10 bg-black p-8 text-white shadow-xl shadow-black/10">
             <div className="relative z-10">
-              <div className="text-3xl font-black mb-1">
-                مرحبًا{me.data?.full_name ? `، ${me.data.full_name.split(' ')[0]}` : ''} 👋
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-3xl font-black">
+                  مرحبًا{me.data?.full_name ? `، ${me.data.full_name.split(' ')[0]}` : ''} 👋
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 rounded-2xl px-4 py-2">
+                  <div className="text-2xl font-black text-[#C9A84C]">Lvl {level}</div>
+                  <div className="text-xs text-white/60">المستوى</div>
+                </div>
               </div>
-              <p className="text-white/60 text-sm font-medium leading-relaxed">
+              <p className="text-white/60 text-sm font-medium leading-relaxed mb-6">
                 سعادتنا بوجودك تزداد مع كل مساهمة تطوعية تقوم بها.
                 <br />
                 أنت جزء مهم من رحلة العطاء في جامعة الطائف.
               </p>
+
+              {/* Progress Bar */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-white/60 font-medium">النقاط: {totalPoints}</span>
+                  <span className="text-[#C9A84C] font-bold">{pointsInCurrentLevel}/10 للمستوى التالي</span>
+                </div>
+                <div className="h-3 w-full rounded-full bg-white/10 overflow-hidden">
+                  <div 
+                    className="h-full rounded-full bg-gradient-to-r from-[#C9A84C] to-[#E8C97A] transition-all duration-500"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              </div>
             </div>
             
             {/* Background Decoration */}

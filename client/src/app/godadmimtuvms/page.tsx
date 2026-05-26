@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
 import { useState } from 'react'
 import * as XLSX from 'xlsx'
-import { LucideAward, LucideCalendar, LucidePlus, LucideTrash2, LucideUsers, LucideSettings, LucideSearch, LucideEye, LucideFileCheck, LucideDownload, LucidePieChart } from 'lucide-react'
+import { LucideAward, LucideCalendar, LucidePlus, LucideTrash2, LucideUsers, LucideSettings, LucideSearch, LucideEye, LucideFileCheck, LucideDownload, LucidePieChart, LucideScanLine } from 'lucide-react'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -264,6 +264,12 @@ function AdminBody() {
           >
             <LucidePieChart size={18} /> الإحصائيات
           </button>
+          <Link
+            href="/scan-attendance"
+            className="flex items-center gap-2 h-12 px-6 rounded-2xl text-sm font-bold transition-all whitespace-nowrap bg-[#C9A84C] text-[#0D0C0A] hover:bg-[#E8C97A] shadow-lg"
+          >
+            <LucideScanLine size={18} /> مسح الحضور
+          </Link>
         </div>
 
         {activeTab === 'stats' && stats.data && (

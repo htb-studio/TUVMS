@@ -5,7 +5,7 @@ import AppShell from '@/components/AppShell'
 import AuthGate from '@/components/AuthGate'
 import { supabase } from '@/lib/supabaseClient'
 import { useState } from 'react'
-import { LucideQrCode, LucideDownload, LucideShieldCheck, LucideMaximize2, LucideCopy, LucideCheck, LucideX } from 'lucide-react'
+import { LucideQrCode, LucideDownload, LucideShieldCheck, LucideMaximize2, LucideCopy, LucideCheck, LucideX, LucideLock, LucideCrown } from 'lucide-react'
 import QRCode from 'react-qr-code'
 
 export default function DigitalCardPage() {
@@ -50,7 +50,19 @@ export default function DigitalCardPage() {
   })
 
   const user = me.data
+  const level = user?.level || 1
   const qrValue = user ? JSON.stringify({ id: user.id, type: 'volunteer_card' }) : ''
+
+  // Feature unlock levels
+  const featureUnlocks = {
+    qrCode: 1,
+    downloadCard: 3,
+    premiumBadge: 5,
+    goldenBorder: 7,
+    legendaryGlow: 10
+  }
+
+  const isFeatureUnlocked = (featureLevel: number) => level >= featureLevel
 
   const copyId = () => {
     if (user?.id) {
@@ -79,7 +91,12 @@ export default function DigitalCardPage() {
             <div className={`relative h-full w-full rounded-[3rem] transition-all duration-700 [transform-style:preserve-3d] shadow-2xl shadow-black/20 ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
               
               <div className="absolute inset-0 h-full w-full [backface-visibility:hidden]">
-                <div className="h-full w-full rounded-[3rem] bg-zinc-900 p-8 text-white relative overflow-hidden flex flex-col border-4 border-white/5">
+                <div className={`h-full w-full rounded-[3rem] p-8 text-white relative overflow-hidden flex flex-col ${level >= 7 ? 'bg-gradient-to-br from-[#C9A84C] to-[#8B6914]' : 'bg-zinc-900'} border-4 ${level >= 7 ? 'border-[#FFD700]' : 'border-white/5'}`}>
+                  {level >= 10 && (
+                    <div className="absolute inset-0 rounded-[3rem] overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#C9A84C]/20 via-transparent to-[#C9A84C]/20 animate-pulse" />
+                    </div>
+                  )}
                   <div className="absolute top-0 right-0 w-64 h-64 bg-[#C9A84C]/10 rounded-full blur-3xl -mr-20 -mt-20" />
                   <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl -ml-10 -mb-10" />
                   
@@ -88,13 +105,20 @@ export default function DigitalCardPage() {
                       <div className="text-[10px] font-black tracking-[0.3em] text-white/40 uppercase mb-1">Taif University</div>
                       <div className="text-lg font-black text-[#C9A84C]">نادي التطوع</div>
                     </div>
-                    <div className="h-12 w-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 backdrop-blur-md">
-                      <LucideShieldCheck className="text-[#C9A84C]" size={28} />
+                    <div className="flex items-center gap-2">
+                      {level >= 5 && (
+                        <div className="h-12 w-12 rounded-2xl bg-[#FFD700]/20 flex items-center justify-center border border-[#FFD700]/30 backdrop-blur-md">
+                          <LucideCrown className="text-[#FFD700]" size={24} />
+                        </div>
+                      )}
+                      <div className="h-12 w-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 backdrop-blur-md">
+                        <LucideShieldCheck className="text-[#C9A84C]" size={28} />
+                      </div>
                     </div>
                   </div>
 
                   <div className="mt-auto relative z-10">
-                    <div className="h-24 w-24 rounded-[2rem] bg-gradient-to-tr from-[#C9A84C] to-[#8B6914] p-1 mb-6">
+                    <div className={`h-24 w-24 rounded-[2rem] p-1 mb-6 ${level >= 5 ? 'bg-gradient-to-tr from-[#FFD700] to-[#FFA500]' : 'bg-gradient-to-tr from-[#C9A84C] to-[#8B6914]'}`}>
                       <div className="h-full w-full rounded-[1.8rem] bg-zinc-800 flex items-center justify-center overflow-hidden">
                         <span className="text-3xl font-black text-white/20">{user?.full_name?.slice(0, 1)}</span>
                       </div>
@@ -113,8 +137,11 @@ export default function DigitalCardPage() {
                       <div className="text-2xl font-black text-[#C9A84C]">{stats.data?.totalHours || 0}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-[10px] font-bold text-white/30 uppercase tracking-wider mb-1">المساهمات</div>
-                      <div className="text-2xl font-black text-white">{stats.data?.eventsCount || 0}</div>
+                      <div className="text-[10px] font-bold text-white/30 uppercase tracking-wider mb-1">المستوى</div>
+                      <div className="text-2xl font-black text-white flex items-center justify-end gap-1">
+                        {level}
+                        {level >= 10 && <LucideCrown size={20} className="text-[#FFD700]" />}
+                      </div>
                     </div>
                   </div>
 
@@ -169,12 +196,80 @@ export default function DigitalCardPage() {
               {copied ? 'تم النسخ' : 'نسخ الرقم الجامعي'}
             </button>
             <button 
-              onClick={() => alert('ميزة حفظ البطاقة كصورة ستتوفر قريباً في التحديث القادم!')}
-              className="flex items-center justify-center gap-3 h-16 rounded-[1.5rem] bg-white border border-black/10 text-zinc-600 font-black text-sm hover:bg-zinc-50 transition-all active:scale-95"
+              onClick={() => {
+                if (isFeatureUnlocked(featureUnlocks.downloadCard)) {
+                  alert('ميزة حفظ البطاقة كصورة ستتوفر قريباً في التحديث القادم!')
+                } else {
+                  alert(`هذه الميزة تتطلب المستوى ${featureUnlocks.downloadCard}\nمستواك الحالي: ${level}`)
+                }
+              }}
+              className={`flex items-center justify-center gap-3 h-16 rounded-[1.5rem] font-black text-sm transition-all active:scale-95 ${
+                isFeatureUnlocked(featureUnlocks.downloadCard)
+                  ? 'bg-white border border-black/10 text-zinc-600 hover:bg-zinc-50'
+                  : 'bg-zinc-100 border border-zinc-200 text-zinc-400 cursor-not-allowed'
+              }`}
             >
-              <LucideDownload size={18} />
-              حفظ كصورة
+              {isFeatureUnlocked(featureUnlocks.downloadCard) ? (
+                <LucideDownload size={18} />
+              ) : (
+                <LucideLock size={18} />
+              )}
+              {isFeatureUnlocked(featureUnlocks.downloadCard) ? 'حفظ كصورة' : `مغلق (Lvl ${featureUnlocks.downloadCard})`}
             </button>
+          </div>
+
+          {/* Feature Unlocks Info */}
+          <div className="rounded-3xl bg-zinc-50 border border-zinc-200 p-6">
+            <div className="text-sm font-black text-zinc-900 mb-4 flex items-center gap-2">
+              <LucideCrown size={18} className="text-[#C9A84C]" />
+              الميزات المتقدمة
+            </div>
+            <div className="space-y-3">
+              <div className={`flex items-center justify-between p-3 rounded-xl ${isFeatureUnlocked(featureUnlocks.downloadCard) ? 'bg-emerald-50' : 'bg-zinc-100'}`}>
+                <div className="flex items-center gap-2">
+                  {isFeatureUnlocked(featureUnlocks.downloadCard) ? (
+                    <LucideCheck className="text-emerald-600" size={16} />
+                  ) : (
+                    <LucideLock className="text-zinc-400" size={16} />
+                  )}
+                  <span className="text-xs font-bold text-zinc-700">حفظ البطاقة كصورة</span>
+                </div>
+                <span className="text-[10px] font-black text-zinc-500">Lvl {featureUnlocks.downloadCard}</span>
+              </div>
+              <div className={`flex items-center justify-between p-3 rounded-xl ${isFeatureUnlocked(featureUnlocks.premiumBadge) ? 'bg-emerald-50' : 'bg-zinc-100'}`}>
+                <div className="flex items-center gap-2">
+                  {isFeatureUnlocked(featureUnlocks.premiumBadge) ? (
+                    <LucideCheck className="text-emerald-600" size={16} />
+                  ) : (
+                    <LucideLock className="text-zinc-400" size={16} />
+                  )}
+                  <span className="text-xs font-bold text-zinc-700">شارة التميز الذهبية</span>
+                </div>
+                <span className="text-[10px] font-black text-zinc-500">Lvl {featureUnlocks.premiumBadge}</span>
+              </div>
+              <div className={`flex items-center justify-between p-3 rounded-xl ${isFeatureUnlocked(featureUnlocks.goldenBorder) ? 'bg-emerald-50' : 'bg-zinc-100'}`}>
+                <div className="flex items-center gap-2">
+                  {isFeatureUnlocked(featureUnlocks.goldenBorder) ? (
+                    <LucideCheck className="text-emerald-600" size={16} />
+                  ) : (
+                    <LucideLock className="text-zinc-400" size={16} />
+                  )}
+                  <span className="text-xs font-bold text-zinc-700">حدود ذهبية للبطاقة</span>
+                </div>
+                <span className="text-[10px] font-black text-zinc-500">Lvl {featureUnlocks.goldenBorder}</span>
+              </div>
+              <div className={`flex items-center justify-between p-3 rounded-xl ${isFeatureUnlocked(featureUnlocks.legendaryGlow) ? 'bg-emerald-50' : 'bg-zinc-100'}`}>
+                <div className="flex items-center gap-2">
+                  {isFeatureUnlocked(featureUnlocks.legendaryGlow) ? (
+                    <LucideCheck className="text-emerald-600" size={16} />
+                  ) : (
+                    <LucideLock className="text-zinc-400" size={16} />
+                  )}
+                  <span className="text-xs font-bold text-zinc-700">التوهج الأسطوري</span>
+                </div>
+                <span className="text-[10px] font-black text-zinc-500">Lvl {featureUnlocks.legendaryGlow}</span>
+              </div>
+            </div>
           </div>
 
           <div className="rounded-3xl bg-amber-50/50 border border-amber-100 p-6 flex gap-4">

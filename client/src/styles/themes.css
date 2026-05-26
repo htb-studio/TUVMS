@@ -1,0 +1,216 @@
+/* TUVMS Level-Based Theme System */
+/* 10 Progressive Themes from Carbon to Legendary */
+
+:root {
+  /* Base Theme Variables - Level 1 (Carbon) */
+  --theme-primary: #6B7280;
+  --theme-secondary: #9CA3AF;
+  --theme-accent: #4B5563;
+  --theme-bg: #F9FAFB;
+  --theme-bg-alt: #F3F4F6;
+  --theme-text: #111827;
+  --theme-text-muted: #6B7280;
+  --theme-border: #E5E7EB;
+  --theme-card-bg: #FFFFFF;
+  --theme-glow: rgba(107, 114, 128, 0.1);
+  --theme-gradient: linear-gradient(135deg, #6B7280 0%, #9CA3AF 100%);
+}
+
+/* Level 2 - Iron */
+body[data-theme-level="2"] {
+  --theme-primary: #78716C;
+  --theme-secondary: #A8A29E;
+  --theme-accent: #57534E;
+  --theme-bg: #FAFAF9;
+  --theme-bg-alt: #F5F5F4;
+  --theme-text: #1C1917;
+  --theme-text-muted: #78716C;
+  --theme-border: #E7E5E4;
+  --theme-card-bg: #FFFFFF;
+  --theme-glow: rgba(120, 113, 108, 0.15);
+  --theme-gradient: linear-gradient(135deg, #78716C 0%, #A8A29E 100%);
+}
+
+/* Level 3 - Bronze */
+body[data-theme-level="3"] {
+  --theme-primary: #CD7F32;
+  --theme-secondary: #D4A574;
+  --theme-accent: #B87333;
+  --theme-bg: #FFFBF7;
+  --theme-bg-alt: #FFF7ED;
+  --theme-text: #1C1917;
+  --theme-text-muted: #78716C;
+  --theme-border: #FED7AA;
+  --theme-card-bg: #FFFFFF;
+  --theme-glow: rgba(205, 127, 50, 0.15);
+  --theme-gradient: linear-gradient(135deg, #CD7F32 0%, #D4A574 100%);
+}
+
+/* Level 4 - Silver */
+body[data-theme-level="4"] {
+  --theme-primary: #C0C0C0;
+  --theme-secondary: #D3D3D3;
+  --theme-accent: #A9A9A9;
+  --theme-bg: #FAFAFA;
+  --theme-bg-alt: #F5F5F5;
+  --theme-text: #1A1A1A;
+  --theme-text-muted: #6B7280;
+  --theme-border: #E5E5E5;
+  --theme-card-bg: #FFFFFF;
+  --theme-glow: rgba(192, 192, 192, 0.2);
+  --theme-gradient: linear-gradient(135deg, #C0C0C0 0%, #D3D3D3 100%);
+}
+
+/* Level 5 - Gold */
+body[data-theme-level="5"] {
+  --theme-primary: #FFD700;
+  --theme-secondary: #FFEC8B;
+  --theme-accent: #DAA520;
+  --theme-bg: #FFFEF7;
+  --theme-bg-alt: #FFFAE6;
+  --theme-text: #1A1A1A;
+  --theme-text-muted: #78716C;
+  --theme-border: #FDE68A;
+  --theme-card-bg: #FFFFFF;
+  --theme-glow: rgba(255, 215, 0, 0.2);
+  --theme-gradient: linear-gradient(135deg, #FFD700 0%, #FFEC8B 100%);
+}
+
+/* Level 6 - Platinum */
+body[data-theme-level="6"] {
+  --theme-primary: #E5E4E2;
+  --theme-secondary: #F5F5F5;
+  --theme-accent: #C0C0C0;
+  --theme-bg: #FAFAFA;
+  --theme-bg-alt: #F0F0F0;
+  --theme-text: #1A1A1A;
+  --theme-text-muted: #6B7280;
+  --theme-border: #E0E0E0;
+  --theme-card-bg: #FFFFFF;
+  --theme-glow: rgba(229, 228, 226, 0.25);
+  --theme-gradient: linear-gradient(135deg, #E5E4E2 0%, #F5F5F5 100%);
+}
+
+/* Level 7 - Glass */
+body[data-theme-level="7"] {
+  --theme-primary: #6366F1;
+  --theme-secondary: #818CF8;
+  --theme-accent: #4F46E5;
+  --theme-bg: #F8FAFC;
+  --theme-bg-alt: #F1F5F9;
+  --theme-text: #0F172A;
+  --theme-text-muted: #64748B;
+  --theme-border: #E2E8F0;
+  --theme-card-bg: rgba(255, 255, 255, 0.8);
+  --theme-glow: rgba(99, 102, 241, 0.2);
+  --theme-gradient: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
+}
+
+/* Level 8 - Crystal */
+body[data-theme-level="8"] {
+  --theme-primary: #06B6D4;
+  --theme-secondary: #22D3EE;
+  --theme-accent: #0891B2;
+  --theme-bg: #F0FDFA;
+  --theme-bg-alt: #CCFBF1;
+  --theme-text: #0F172A;
+  --theme-text-muted: #64748B;
+  --theme-border: #99F6E4;
+  --theme-card-bg: rgba(255, 255, 255, 0.85);
+  --theme-glow: rgba(6, 182, 212, 0.25);
+  --theme-gradient: linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%);
+}
+
+/* Level 9 - Diamond */
+body[data-theme-level="9"] {
+  --theme-primary: #B9F2FF;
+  --theme-secondary: #E0F7FA;
+  --theme-accent: #4DD0E1;
+  --theme-bg: #F0FDFF;
+  --theme-bg-alt: #E0F7FF;
+  --theme-text: #0C4A6E;
+  --theme-text-muted: #0369A1;
+  --theme-border: #B3E5FC;
+  --theme-card-bg: rgba(255, 255, 255, 0.9);
+  --theme-glow: rgba(185, 242, 255, 0.3);
+  --theme-gradient: linear-gradient(135deg, #B9F2FF 0%, #E0F7FA 100%);
+}
+
+/* Level 10 - Legendary (Athar Club - Black with Golden Laser Glow) */
+body[data-theme-level="10"] {
+  --theme-primary: #C9A84C;
+  --theme-secondary: #E8C97A;
+  --theme-accent: #FFD700;
+  --theme-bg: #0D0C0A;
+  --theme-bg-alt: #1A1814;
+  --theme-text: #FFFFFF;
+  --theme-text-muted: #A8A29E;
+  --theme-border: #C9A84C;
+  --theme-card-bg: #1A1814;
+  --theme-glow: rgba(201, 168, 76, 0.4);
+  --theme-gradient: linear-gradient(135deg, #C9A84C 0%, #FFD700 50%, #C9A84C 100%);
+  --theme-laser-glow: 0 0 20px rgba(201, 168, 76, 0.6), 0 0 40px rgba(201, 168, 76, 0.4), 0 0 60px rgba(201, 168, 76, 0.2);
+}
+
+/* Legendary Special Effects */
+body[data-theme-level="10"] .legendary-glow {
+  box-shadow: var(--theme-laser-glow);
+  animation: laserPulse 2s ease-in-out infinite;
+}
+
+@keyframes laserPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(201, 168, 76, 0.6), 0 0 40px rgba(201, 168, 76, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(201, 168, 76, 0.8), 0 0 60px rgba(201, 168, 76, 0.6), 0 0 80px rgba(201, 168, 76, 0.4);
+  }
+}
+
+/* Apply theme variables to common elements */
+body {
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body[data-theme-level="10"] {
+  background: linear-gradient(180deg, #0D0C0A 0%, #1A1814 100%);
+}
+
+/* Card backgrounds with theme support */
+.theme-card {
+  background-color: var(--theme-card-bg);
+  border-color: var(--theme-border);
+  transition: all 0.3s ease;
+}
+
+/* Primary buttons with theme */
+.theme-button-primary {
+  background: var(--theme-gradient);
+  color: var(--theme-text);
+  box-shadow: 0 4px 15px var(--theme-glow);
+}
+
+/* Accent elements */
+.theme-accent {
+  color: var(--theme-primary);
+}
+
+.theme-accent-bg {
+  background-color: var(--theme-primary);
+  color: white;
+}
+
+/* Progress bars */
+.theme-progress {
+  background: var(--theme-gradient);
+  box-shadow: 0 0 10px var(--theme-glow);
+}
+
+/* Level badges */
+.level-badge {
+  background: var(--theme-gradient);
+  color: var(--theme-text);
+  box-shadow: 0 2px 10px var(--theme-glow);
+}

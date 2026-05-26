@@ -79,7 +79,7 @@ export default function ForgotPasswordPage() {
               <ol className="space-y-2 text-xs text-amber-100/80 list-decimal list-inside">
                 <li>تواصل معنا عبر الواتساب أو البريد الإلكتروني</li>
                 <li>قدم معلومات هويتك (الاسم والرقم الجامعي)</li>
-                <li>بعد التحقق، سأرسل لك رابط إعادة التعيين</li>
+                <li>بعد التحقق، سأنرسل لك رابط إعادة التعيين</li>
                 <li>استخدم الرابط لتعيين كلمة مرور جديدة</li>
               </ol>
             </div>

@@ -123,13 +123,12 @@ function ScanAttendanceBody() {
       if (!session) throw new Error('يجب تسجيل الدخول')
 
       const { error } = await supabase.from('volunteer_behavior_logs').insert({
-        user_id: scannedUser.id,
+        volunteer_id: scannedUser.id,
         event_id: selectedEvent.id,
-        evaluator_id: session.user.id,
-        behavior_type: behaviorType,
-        behavior_category: behaviorCategory || null,
-        admin_notes: adminNotes || null,
-        points_impact: behaviorType === 'positive' ? 5 : (behaviorType === 'negative' ? -5 : 0)
+        admin_id: session.user.id,
+        evaluation_type: behaviorType === 'positive' ? 'Positive' : 'Negative',
+        reason_tag: behaviorCategory || 'Other',
+        admin_notes: adminNotes || null
       })
 
       if (error) throw error

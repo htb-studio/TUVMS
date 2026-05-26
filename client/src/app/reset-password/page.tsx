@@ -14,12 +14,29 @@ export default function ResetPasswordPage() {
   const [isSessionValid, setIsSessionValid] = useState<boolean | null>(null)
 
   useEffect(() => {
-    // Check if we have a valid session from the reset link
-    const checkSession = async () => {
+    // Extract tokens from URL and set session
+    const setupSession = async () => {
+      const hash = window.location.hash
+      const accessToken = new URLSearchParams(hash.substring(1)).get('access_token')
+      const refreshToken = new URLSearchParams(hash.substring(1)).get('refresh_token')
+
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        })
+        if (error) {
+          console.error('Session setup error:', error)
+          setIsSessionValid(false)
+          return
+        }
+      }
+
+      // Check if we have a valid session
       const { data: { session } } = await supabase.auth.getSession()
       setIsSessionValid(!!session)
     }
-    checkSession()
+    setupSession()
   }, [])
 
   function validatePassword(pw: string) {

@@ -146,7 +146,7 @@ export default function OrganizerPage() {
                   <div>
                     <label className="block text-xs font-bold text-zinc-600 mb-2">السعة</label>
                     <input
-                      className="h-11 w-full rounded-2xl border border-black/10 bg-white px-4 text-sm outline-none focus:border-black/30"
+                      className="h-11 w-full rounded-2xl border border-black/10 bg-white px-4 text-sm outline-none focus:border-black/30 text-[#0D0C0A]"
                       value={capacity}
                       onChange={(e) => setCapacity(Number(e.target.value || 0))}
                       type="number"

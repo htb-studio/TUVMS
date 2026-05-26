@@ -268,7 +268,7 @@ export default function EventsPage() {
                             </div>
                           )}
                         </div>
-                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">#{e.id.slice(0,4)}</span>
+                        <span className="text-[10px] font-bold text-[#0D0C0A] uppercase tracking-widest">#{e.id.slice(0,4)}</span>
                       </div>
 
                       <h3 className="text-xl font-black text-black group-hover:text-amber-600 transition-colors line-clamp-1 mb-3">

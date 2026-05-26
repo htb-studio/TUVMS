@@ -227,7 +227,7 @@ export default function EventDetailsPage() {
                   </div>
                   <div>
                     <div className="text-[10px] font-bold text-white/40 uppercase">السعة المتبقية</div>
-                    <div className="text-sm font-black">
+                    <div className="text-sm font-black text-white">
                       {availability.data ? (availability.data.capacity - availability.data.registeredCount) : '...'} متطوع
                     </div>
                   </div>

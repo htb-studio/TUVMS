@@ -576,7 +576,7 @@ function StatCard({ title, value, icon }: { title: string, value: number, icon: 
         {icon}
       </div>
       <div>
-        <div className="text-2xl font-black">{value}</div>
+        <div className="text-2xl font-black text-[#0D0C0A]">{value}</div>
         <div className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{title}</div>
       </div>
     </div>

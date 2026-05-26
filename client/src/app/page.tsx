@@ -73,7 +73,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-3xl font-black">الفعاليات الحالية</h2>
-              <p className="text-white/60 text-sm mt-1">اكتشف فرص التطوع المتاحة الآن</p>
+              <p className="text-white/80 text-sm mt-1">اكتشف فرص التطوع المتاحة الآن</p>
             </div>
             <Link href="/events" className="group flex items-center gap-2 text-sm font-bold text-[#C9A84C] hover:text-[#E8C97A] transition-colors">
               عرض الكل
@@ -107,12 +107,12 @@ export default function HomePage() {
                       )}
                       <span>{event.registration_status === 'open' ? 'التسجيل مفتوح' : 'التسجيل مغلق'}</span>
                     </div>
-                    <span className="text-[10px] text-white/30 font-mono">#{event.id.slice(0, 4)}</span>
+                    <span className="text-[10px] text-white/50 font-mono">#{event.id.slice(0, 4)}</span>
                   </div>
                   
                   <h3 className="text-xl font-black mb-4 line-clamp-2 group-hover:text-[#C9A84C] transition-colors">{event.title}</h3>
                   
-                  <div className="space-y-3 text-sm text-white/70">
+                  <div className="space-y-3 text-sm text-white/80">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 rounded-xl bg-[#C9A84C]/20 flex items-center justify-center">
                         <LucideCalendar size={16} className="text-[#C9A84C]" />
@@ -139,8 +139,8 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="rounded-3xl border border-white/10 bg-white/5 p-12 text-center">
-              <div className="text-white/60 text-lg">لا توجد فعاليات حالياً</div>
-              <p className="text-white/40 text-sm mt-2">تابعنا للفرص القادمة</p>
+              <div className="text-white/80 text-lg">لا توجد فعاليات حالياً</div>
+              <p className="text-white/60 text-sm mt-2">تابعنا للفرص القادمة</p>
             </div>
           )}
         </div>
@@ -152,7 +152,7 @@ export default function HomePage() {
               className="group rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_18px_50px_-40px_rgba(0,0,0,0.7)] hover:bg-white/10 hover:border-[#C9A84C]/30 transition-all duration-300 transform hover:-translate-y-1"
             >
               <div className="text-sm font-extrabold text-[#EBD58F] group-hover:text-[#C9A84C] transition-colors">{s.title}</div>
-              <div className="mt-4 text-sm leading-8 text-white/65 group-hover:text-white/80 transition-colors">{s.body}</div>
+              <div className="mt-4 text-sm leading-8 text-white/75 group-hover:text-white/90 transition-colors">{s.body}</div>
             </div>
           ))}
         </div>
@@ -161,7 +161,7 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center justify-between gap-6">
             <div>
               <div className="text-2xl font-black">جاهز تبدأ؟</div>
-              <div className="mt-3 text-base text-white/70">أنشئ حسابك الجامعي وابدأ في فرص التطوع خلال دقائق.</div>
+              <div className="mt-3 text-base text-white/80">أنشئ حسابك الجامعي وابدأ في فرص التطوع خلال دقائق.</div>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link href={c.primaryCta.href} className="group h-14 px-8 rounded-2xl bg-gradient-to-r from-[#C9A84C] to-[#E8C97A] text-[#0D0C0A] font-extrabold text-base hover:shadow-2xl hover:shadow-[#C9A84C]/30 transition-all duration-300 transform hover:scale-105 flex items-center gap-2">

@@ -7,7 +7,7 @@ export default function AccountSuspendedPage() {
     <main className="min-h-screen bg-[#0D0C0A] text-white flex items-center justify-center px-6">
       <div className="w-full max-w-lg rounded-3xl border border-[#C9A84C]/20 bg-[#1A1814] p-8">
         <div className="text-2xl font-black">عذرًا، تم إيقاف حسابك</div>
-        <div className="mt-3 text-sm text-white/60">
+        <div className="mt-3 text-sm text-white/80">
           حسابك موقوف حاليًا من الإدارة. إذا كنت تعتقد أن هذا خطأ، تواصل مع فريق الدعم/الإدارة.
         </div>
 

@@ -159,7 +159,7 @@ export default function ResetPasswordPage() {
 
           <div className="mt-8 space-y-4">
             <div>
-              <label className="block text-xs font-bold text-white/45 mb-2">كلمة المرور الجديدة</label>
+              <label className="block text-xs font-bold text-white/70 mb-2">كلمة المرور الجديدة</label>
               <input
                 className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-white/5 px-4 text-sm outline-none focus:border-[#C9A84C]"
                 value={password}
@@ -187,7 +187,7 @@ export default function ResetPasswordPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-white/45 mb-2">تأكيد كلمة المرور</label>
+              <label className="block text-xs font-bold text-white/70 mb-2">تأكيد كلمة المرور</label>
               <input
                 className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-white/5 px-4 text-sm outline-none focus:border-[#C9A84C]"
                 value={confirmPassword}
@@ -210,7 +210,7 @@ export default function ResetPasswordPage() {
             </div>
 
             <div className="rounded-2xl border border-[#C9A84C]/15 bg-white/5 p-4">
-              <div className="text-xs font-bold text-white/60 mb-3">متطلبات كلمة المرور:</div>
+              <div className="text-xs font-bold text-white/80 mb-3">متطلبات كلمة المرور:</div>
               <div className="space-y-2">
                 <div className={`text-[10px] flex items-center gap-2 ${password.length >= 8 ? 'text-emerald-400' : 'text-white/30'}`}>
                   <div className={`h-1.5 w-1.5 rounded-full ${password.length >= 8 ? 'bg-emerald-400' : 'bg-white/20'}`} />
@@ -244,7 +244,7 @@ export default function ResetPasswordPage() {
             </button>
           </div>
 
-          <div className="mt-6 text-center text-sm text-white/45">
+          <div className="mt-6 text-center text-sm text-white/70">
             <button
               onClick={() => router.push('/auth')}
               className="text-[#C9A84C] font-bold hover:text-[#E8C97A] flex items-center justify-center gap-2"

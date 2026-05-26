@@ -238,7 +238,7 @@ function ScanAttendanceBody() {
               <LucideScanLine className="text-[#C9A84C]" size={24} />
               مسح باركود المتطوع
             </h2>
-            <p className="mt-2 text-sm text-zinc-600">
+            <p className="mt-2 text-sm text-zinc-700">
               امسح QR Code الخاص ببطاقة المتطوع لعرض بياناته وتقييم سلوكه
             </p>
           </div>
@@ -291,33 +291,33 @@ function ScanAttendanceBody() {
             <div className="p-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                  <div className="text-xs text-zinc-500">الاسم</div>
+                  <div className="text-xs text-zinc-700">الاسم</div>
                   <div className="mt-1 text-sm font-bold">{scannedUser.full_name || '—'}</div>
                 </div>
                 <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                  <div className="text-xs text-zinc-500">البريد</div>
+                  <div className="text-xs text-zinc-700">البريد</div>
                   <div className="mt-1 text-sm font-bold break-all">{scannedUser.email || '—'}</div>
                 </div>
                 <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                  <div className="text-xs text-zinc-500 flex items-center gap-1">
+                  <div className="text-xs text-zinc-700 flex items-center gap-1">
                     <LucideUniversity size={12} />
                     الرقم الجامعي
                   </div>
                   <div className="mt-1 text-sm font-bold">{scannedUser.university_id || '—'}</div>
                 </div>
                 <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                  <div className="text-xs text-zinc-500 flex items-center gap-1">
+                  <div className="text-xs text-zinc-700 flex items-center gap-1">
                     <LucidePhone size={12} />
                     رقم الجوال
                   </div>
                   <div className="mt-1 text-sm font-bold">{scannedUser.phone || '—'}</div>
                 </div>
                 <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                  <div className="text-xs text-zinc-500">المستوى</div>
+                  <div className="text-xs text-zinc-700">المستوى</div>
                   <div className="mt-1 text-sm font-bold">Level {scannedUser.level || 1}</div>
                 </div>
                 <div className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
-                  <div className="text-xs text-zinc-500">النقاط</div>
+                  <div className="text-xs text-zinc-700">النقاط</div>
                   <div className="mt-1 text-sm font-bold">{scannedUser.total_points || 0}</div>
                 </div>
               </div>
@@ -365,7 +365,7 @@ function ScanAttendanceBody() {
             <div className="p-6 space-y-4">
               {/* Behavior Type */}
               <div>
-                <div className="text-xs font-bold text-zinc-600 mb-3">نوع التقييم</div>
+                <div className="text-xs font-bold text-zinc-700 mb-3">نوع التقييم</div>
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     onClick={() => setBehaviorType('positive')}
@@ -404,7 +404,7 @@ function ScanAttendanceBody() {
 
               {/* Behavior Category */}
               <div>
-                <div className="text-xs font-bold text-zinc-600 mb-3">فئة التقييم</div>
+                <div className="text-xs font-bold text-zinc-700 mb-3">فئة التقييم</div>
                 <select
                   value={behaviorCategory}
                   onChange={(e) => setBehaviorCategory(e.target.value)}
@@ -424,7 +424,7 @@ function ScanAttendanceBody() {
 
               {/* Admin Notes */}
               <div>
-                <div className="text-xs font-bold text-zinc-600 mb-3">ملاحظات الإدارة</div>
+                <div className="text-xs font-bold text-zinc-700 mb-3">ملاحظات الإدارة</div>
                 <textarea
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}

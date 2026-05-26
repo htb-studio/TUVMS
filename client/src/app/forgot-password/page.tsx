@@ -14,7 +14,7 @@ export default function ForgotPasswordPage() {
             <div className="text-2xl font-black text-[#C9A84C]">نادي التطوع</div>
             <div className="mt-2 text-[11px] tracking-[0.25em] text-white/35">TUVMS — TAIF UNIVERSITY</div>
             <div className="mt-6 text-lg font-extrabold">استعادة كلمة المرور</div>
-            <div className="mt-2 text-sm text-white/45">
+            <div className="mt-2 text-sm text-white/70">
               لضمان أمان حسابك، نستخدم التحقق اليدوي عبر الواتساب
             </div>
           </div>
@@ -26,20 +26,20 @@ export default function ForgotPasswordPage() {
               </div>
               <div>
                 <div className="text-sm font-black text-white">التحقق اليدوي</div>
-                <div className="text-xs text-white/45">للحماية من محاولات الاختراق</div>
+                <div className="text-xs text-white/70">للحماية من محاولات الاختراق</div>
               </div>
             </div>
 
             <div className="mt-6 space-y-4">
               <div className="rounded-2xl border border-[#C9A84C]/20 bg-white/5 p-4">
-                <div className="text-xs font-bold text-white/45 mb-2">تواصل معنا عبر الواتساب</div>
+                <div className="text-xs font-bold text-white/70 mb-2">تواصل معنا عبر الواتساب</div>
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
                     <LucideMessageCircle className="text-emerald-400" size={20} />
                   </div>
                   <div>
                     <div className="text-sm font-black text-white">حاتم طلال المطيري</div>
-                    <div className="text-xs text-white/45">قائد لجنة تقنية المعلومات</div>
+                    <div className="text-xs text-white/70">قائد لجنة تقنية المعلومات</div>
                   </div>
                 </div>
                 <a
@@ -54,14 +54,14 @@ export default function ForgotPasswordPage() {
               </div>
 
               <div className="rounded-2xl border border-[#C9A84C]/20 bg-white/5 p-4">
-                <div className="text-xs font-bold text-white/45 mb-2">أو عبر البريد الإلكتروني</div>
+                <div className="text-xs font-bold text-white/70 mb-2">أو عبر البريد الإلكتروني</div>
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
                     <LucideMail className="text-blue-400" size={20} />
                   </div>
                   <div>
                     <div className="text-sm font-black text-white">حسابك الجامعي</div>
-                    <div className="text-xs text-white/45">أرسل من بريدك الجامعي المسجل</div>
+                    <div className="text-xs text-white/70">أرسل من بريدك الجامعي المسجل</div>
                   </div>
                 </div>
                 <a
@@ -85,7 +85,7 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
 
-          <div className="mt-6 text-center text-sm text-white/45">
+          <div className="mt-6 text-center text-sm text-white/70">
             <Link href="/auth" className="text-[#C9A84C] font-bold hover:text-[#E8C97A] flex items-center justify-center gap-2">
               <LucideArrowRight size={16} className="rotate-180" />
               العودة لتسجيل الدخول

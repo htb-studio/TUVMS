@@ -260,7 +260,7 @@ export default function AuthPage() {
             {mode === 'signup' && (
               <div className="mb-4 grid gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-white/45 mb-2">الاسم الرباعي</label>
+                  <label className="block text-xs font-bold text-white/70 mb-2">الاسم الرباعي</label>
                   <input
                     className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-white/5 px-4 text-sm outline-none focus:border-[#C9A84C]"
                     value={fullName}
@@ -271,7 +271,7 @@ export default function AuthPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-white/45 mb-2">الجنس</label>
+                    <label className="block text-xs font-bold text-white/70 mb-2">الجنس</label>
                     <select
                       className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-[#1A1814] px-3 text-sm outline-none focus:border-[#C9A84C]"
                       value={gender}
@@ -284,7 +284,7 @@ export default function AuthPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-white/45 mb-2">تاريخ الميلاد</label>
+                    <label className="block text-xs font-bold text-white/70 mb-2">تاريخ الميلاد</label>
                     <input
                       className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-white/5 px-4 text-sm outline-none focus:border-[#C9A84C]"
                       value={birthDate}
@@ -296,7 +296,7 @@ export default function AuthPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-white/45 mb-2">الرقم الجامعي</label>
+                    <label className="block text-xs font-bold text-white/70 mb-2">الرقم الجامعي</label>
                     <input
                       className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-white/5 px-4 text-sm outline-none focus:border-[#C9A84C]"
                       value={universityId}
@@ -307,7 +307,7 @@ export default function AuthPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-white/45 mb-2">رقم الجوال</label>
+                    <label className="block text-xs font-bold text-white/70 mb-2">رقم الجوال</label>
                     <input
                       className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-white/5 px-4 text-sm outline-none focus:border-[#C9A84C]"
                       value={phone}
@@ -320,7 +320,7 @@ export default function AuthPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-white/45 mb-2">الكلية</label>
+                    <label className="block text-xs font-bold text-white/70 mb-2">الكلية</label>
                     <select
                       className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-[#1A1814] px-3 text-sm outline-none focus:border-[#C9A84C]"
                       value={college}
@@ -345,7 +345,7 @@ export default function AuthPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-white/45 mb-2">القسم</label>
+                    <label className="block text-xs font-bold text-white/70 mb-2">القسم</label>
                     <input
                       className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-white/5 px-4 text-sm outline-none focus:border-[#C9A84C]"
                       value={department}
@@ -357,7 +357,7 @@ export default function AuthPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-white/45 mb-2">المستوى الدراسي</label>
+                    <label className="block text-xs font-bold text-white/70 mb-2">المستوى الدراسي</label>
                     <input
                       className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-white/5 px-4 text-sm outline-none focus:border-[#C9A84C]"
                       value={academicLevel}
@@ -367,7 +367,7 @@ export default function AuthPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-white/45 mb-2">رقم الهوية</label>
+                    <label className="block text-xs font-bold text-white/70 mb-2">رقم الهوية</label>
                     <input
                       className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-white/5 px-4 text-sm outline-none focus:border-[#C9A84C]"
                       value={nationalId}
@@ -379,11 +379,11 @@ export default function AuthPage() {
                 </div>
 
                 <div className="rounded-3xl border border-[#C9A84C]/15 bg-white/5 p-4">
-                  <div className="text-xs font-extrabold text-white/60">بنك المهارات</div>
+                  <div className="text-xs font-extrabold text-white/80">بنك المهارات</div>
 
                   <div className="mt-4 grid gap-4">
                     <div>
-                      <div className="text-[11px] font-bold text-white/45 mb-2">مهارات تقنية</div>
+                      <div className="text-[11px] font-bold text-white/70 mb-2">مهارات تقنية</div>
                       <div className="flex flex-wrap gap-2">
                         {['برمجة', 'تصميم', 'مونتاج', 'إدارة مواقع'].map((s) => (
                           <button
@@ -405,7 +405,7 @@ export default function AuthPage() {
                     </div>
 
                     <div>
-                      <div className="text-[11px] font-bold text-white/45 mb-2">مهارات يومية/ميدانية</div>
+                      <div className="text-[11px] font-bold text-white/70 mb-2">مهارات يومية/ميدانية</div>
                       <div className="flex flex-wrap gap-2">
                         {['إسعافات أولية', 'تنظيم', 'تصوير فوتوغرافي'].map((s) => (
                           <button
@@ -427,7 +427,7 @@ export default function AuthPage() {
                     </div>
 
                     <div>
-                      <div className="text-[11px] font-bold text-white/45 mb-2">مهارات إدارية</div>
+                      <div className="text-[11px] font-bold text-white/70 mb-2">مهارات إدارية</div>
                       <div className="flex flex-wrap gap-2">
                         {['قيادة فرق', 'كتابة تقارير', 'ترجمة', 'تقديم وإلقاء'].map((s) => (
                           <button
@@ -452,7 +452,7 @@ export default function AuthPage() {
               </div>
             )}
 
-            <label className="block text-xs font-bold text-white/45 mb-2">البريد الجامعي</label>
+            <label className="block text-xs font-bold text-white/70 mb-2">البريد الجامعي</label>
             <input
               className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-white/5 px-4 text-sm outline-none focus:border-[#C9A84C]"
               value={email}
@@ -462,7 +462,7 @@ export default function AuthPage() {
             />
 
             <div className="mt-4">
-              <label className="block text-xs font-bold text-white/45 mb-2">كلمة المرور</label>
+              <label className="block text-xs font-bold text-white/70 mb-2">كلمة المرور</label>
               <input
                 className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-white/5 px-4 text-sm outline-none focus:border-[#C9A84C]"
                 value={password}
@@ -474,7 +474,7 @@ export default function AuthPage() {
                 }}
               />
               {mode === 'signup' && (
-                <div className="mt-2 text-[11px] text-white/45">
+                <div className="mt-2 text-[11px] text-white/70">
                   كلمة مرور قوية: 10 أحرف+ وتحتوي على حرف كبير وصغير ورقم ورمز.
                 </div>
               )}
@@ -482,7 +482,7 @@ export default function AuthPage() {
 
             {mode === 'signup' && (
               <div className="mt-4">
-                <label className="block text-xs font-bold text-white/45 mb-2">تأكيد كلمة المرور</label>
+                <label className="block text-xs font-bold text-white/70 mb-2">تأكيد كلمة المرور</label>
                 <input
                   className="h-11 w-full rounded-2xl border border-[#C9A84C]/20 bg-white/5 px-4 text-sm outline-none focus:border-[#C9A84C]"
                   value={confirmPassword}
@@ -504,11 +504,11 @@ export default function AuthPage() {
               {busy ? 'جاري المعالجة…' : mode === 'signin' ? 'دخول' : 'إنشاء الحساب'}
             </button>
 
-            <div className="mt-6 flex items-center justify-between text-sm text-white/45">
+            <div className="mt-6 flex items-center justify-between text-sm text-white/70">
               <Link href="/forgot-password" className="text-[#C9A84C] font-bold hover:text-[#E8C97A]">
                 نسيت كلمة المرور؟
               </Link>
-              <Link href="/" className="text-white/45 hover:text-white">
+              <Link href="/" className="text-white/70 hover:text-white">
                 رجوع للصفحة التعريفية
               </Link>
             </div>

@@ -10,11 +10,13 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 import { useTheme } from '@/contexts/ThemeContext'
 
 function itemClass(active: boolean, level: number) {
-  const theme = level >= 6 ? { primary: '#C9A84C', secondary: '#8B6914' } : { primary: '#C9A84C', secondary: '#8B6914' }
+  const primaryColor = level === 10 ? '#FFD700' : level === 9 ? '#F0C95C' : level === 8 ? '#E5BE4A' : level === 7 ? '#D4AF37' : level === 6 ? '#C9A84C' : level === 5 ? '#F5E28F' : level === 4 ? '#EAD47E' : level === 3 ? '#DFC66C' : level === 2 ? '#D4B85C' : '#C9A84C'
+  const secondaryColor = level === 10 ? '#FFA500' : level === 9 ? '#FFD700' : level === 8 ? '#F0C95C' : level === 7 ? '#E5BE4A' : level === 6 ? '#D4AF37' : level === 5 ? '#C9A84C' : level === 4 ? '#F5E28F' : level === 3 ? '#EAD47E' : level === 2 ? '#DFC66C' : '#D4B85C'
+
   return [
     'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition',
     active
-      ? `bg-[${theme.primary}]/15 text-[${theme.secondary}]`
+      ? `bg-[${primaryColor}]/15 text-[${secondaryColor}]`
       : level >= 6
       ? 'text-zinc-400 hover:bg-white/5 hover:text-white'
       : 'text-zinc-600 hover:bg-black/[0.03] hover:text-black'
@@ -71,12 +73,12 @@ export default function AppShell({ title, children }: { title: string; children:
 
   return (
     <ThemeProvider level={level}>
-      <div className="min-h-screen bg-[#FFFEF9]" style={{ background: level >= 6 ? (level === 10 ? 'linear-gradient(135deg, #1a0a00 0%, #2d1810 50%, #1a0a00 100%)' : level >= 7 ? '#0F0F0F' : '#1a1a1a') : '#FFFEF9' }}>
+      <div className="min-h-screen bg-[#FFFEF9]" style={{ background: level === 10 ? 'linear-gradient(135deg, #1a0a00 0%, #2d1810 50%, #1a0a00 100%)' : level === 9 ? '#0a0a0a' : level === 8 ? '#151515' : level === 7 ? '#1f1f1f' : level === 6 ? '#2a2a2a' : level === 5 ? '#FFF2C5' : level === 4 ? '#FFF5D6' : level === 3 ? '#FFF8E7' : level === 2 ? '#FFFBF5' : '#FFFFFF' }}>
         {/* Mobile Top Header */}
-        <div className="sticky top-0 z-40 bg-white/80 border-b border-black/5 px-6 py-4 backdrop-blur-md lg:hidden" style={{ background: level >= 6 ? 'rgba(15,15,15,0.8)' : 'rgba(255,255,255,0.8)', borderColor: level >= 6 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
+        <div className="sticky top-0 z-40 bg-white/80 border-b border-black/5 px-6 py-4 backdrop-blur-md lg:hidden" style={{ background: level >= 6 ? 'rgba(26,26,26,0.8)' : 'rgba(255,255,255,0.8)', borderColor: level >= 6 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-[10px] font-black tracking-widest uppercase" style={{ color: level === 10 ? '#FFD700' : level >= 6 ? '#C9A84C' : '#8B6914' }}>TUVMS</div>
+              <div className="text-[10px] font-black tracking-widest uppercase" style={{ color: level === 10 ? '#FFD700' : level === 9 ? '#F0C95C' : level === 8 ? '#E5BE4A' : level === 7 ? '#D4AF37' : level === 6 ? '#C9A84C' : level === 5 ? '#F5E28F' : level === 4 ? '#EAD47E' : level === 3 ? '#DFC66C' : level === 2 ? '#D4B85C' : '#C9A84C' }}>TUVMS</div>
               <div className="text-lg font-black tracking-tight" style={{ color: level >= 6 ? 'white' : '#0D0C0A' }}>{title}</div>
             </div>
             <button
@@ -97,7 +99,7 @@ export default function AppShell({ title, children }: { title: string; children:
       <div className="mx-auto max-w-6xl px-6 py-6 pb-24 lg:pb-6">
         <div className="hidden lg:mb-10 lg:flex lg:items-center lg:justify-between">
           <div>
-            <div className="text-xs font-bold tracking-[0.3em]" style={{ color: level === 10 ? '#FFD700' : level >= 6 ? '#C9A84C' : '#8B6914' }}>TUVMS — TAIF UNIVERSITY</div>
+            <div className="text-xs font-bold tracking-[0.3em]" style={{ color: level === 10 ? '#FFD700' : level === 9 ? '#F0C95C' : level === 8 ? '#E5BE4A' : level === 7 ? '#D4AF37' : level === 6 ? '#C9A84C' : level === 5 ? '#F5E28F' : level === 4 ? '#EAD47E' : level === 3 ? '#DFC66C' : level === 2 ? '#D4B85C' : '#C9A84C' }}>TUVMS — TAIF UNIVERSITY</div>
             <div className="mt-2 text-4xl font-black tracking-tight" style={{ color: level >= 6 ? 'white' : '#0D0C0A' }}>{title}</div>
           </div>
           <button
@@ -115,10 +117,10 @@ export default function AppShell({ title, children }: { title: string; children:
         <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block">
-            <div className="sticky top-6 overflow-hidden rounded-[2.5rem] border border-black/10 bg-white shadow-sm" style={{ background: level >= 6 ? 'rgba(255,255,255,0.05)' : 'white', borderColor: level >= 6 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}>
-              <div className="border-b border-black/5 bg-zinc-50/70 p-6" style={{ background: level >= 6 ? 'rgba(255,255,255,0.03)' : 'rgba(249,250,251,0.7)', borderColor: level >= 6 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
+            <div className="sticky top-6 overflow-hidden rounded-[2.5rem] border border-black/10 bg-white shadow-sm" style={{ background: level >= 6 ? 'rgba(255,255,255,0.05)' : level === 5 ? '#FFF2C5' : level === 4 ? '#FFF5D6' : level === 3 ? '#FFF8E7' : level === 2 ? '#FFFBF5' : 'white', borderColor: level >= 6 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}>
+              <div className="border-b border-black/5 bg-zinc-50/70 p-6" style={{ background: level >= 6 ? 'rgba(255,255,255,0.03)' : level === 5 ? 'rgba(255,242,197,0.7)' : level === 4 ? 'rgba(255,245,214,0.7)' : level === 3 ? 'rgba(255,248,231,0.7)' : level === 2 ? 'rgba(255,251,245,0.7)' : 'rgba(249,250,251,0.7)', borderColor: level >= 6 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-2xl flex items-center justify-center text-white text-xl font-black" style={{ background: level === 10 ? 'linear-gradient(135deg, #FFD700, #FFA500)' : level >= 7 ? '#D4AF37' : level >= 6 ? '#C9A84C' : '#C9A84C' }}>
+                  <div className="h-12 w-12 rounded-2xl flex items-center justify-center text-white text-xl font-black" style={{ background: level === 10 ? 'linear-gradient(135deg, #FFD700, #FFA500)' : level === 9 ? '#F0C95C' : level === 8 ? '#E5BE4A' : level === 7 ? '#D4AF37' : level === 6 ? '#C9A84C' : level === 5 ? '#F5E28F' : level === 4 ? '#EAD47E' : level === 3 ? '#DFC66C' : level === 2 ? '#D4B85C' : '#C9A84C' }}>
                     {me.data?.full_name?.charAt(0) || 'U'}
                   </div>
                   <div>
@@ -157,7 +159,7 @@ export default function AppShell({ title, children }: { title: string; children:
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-black/5 bg-white/90 p-2 pb-safe-area-inset-bottom backdrop-blur-lg lg:hidden" style={{ background: level >= 6 ? 'rgba(15,15,15,0.9)' : 'rgba(255,255,255,0.9)', borderColor: level >= 6 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-black/5 bg-white/90 p-2 pb-safe-area-inset-bottom backdrop-blur-lg lg:hidden" style={{ background: level >= 6 ? 'rgba(26,26,26,0.9)' : 'rgba(255,255,255,0.9)', borderColor: level >= 6 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
         <div className="flex items-center justify-around">
           {bottomNav.map((n) => {
             const Icon = n.icon
@@ -167,7 +169,7 @@ export default function AppShell({ title, children }: { title: string; children:
                 key={n.href}
                 href={n.href}
                 className={`flex flex-col items-center gap-1 rounded-2xl px-3 py-2 transition-all active:scale-90 ${
-                  active ? (level === 10 ? 'text-[#FFD700]' : level >= 6 ? 'text-[#C9A84C]' : 'text-[#8B6914]') : level >= 6 ? 'text-zinc-400' : 'text-zinc-400'
+                  active ? (level === 10 ? 'text-[#FFD700]' : level === 9 ? 'text-[#F0C95C]' : level === 8 ? 'text-[#E5BE4A]' : level === 7 ? 'text-[#D4AF37]' : level === 6 ? 'text-[#C9A84C]' : level === 5 ? 'text-[#F5E28F]' : level === 4 ? 'text-[#EAD47E]' : level === 3 ? 'text-[#DFC66C]' : level === 2 ? 'text-[#D4B85C]' : 'text-[#C9A84C]') : level >= 6 ? 'text-zinc-400' : 'text-zinc-400'
                 }`}
               >
                 <Icon size={24} strokeWidth={active ? 2.5 : 2} />

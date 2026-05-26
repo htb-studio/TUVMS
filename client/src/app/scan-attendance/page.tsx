@@ -89,7 +89,7 @@ function ScanAttendanceBody() {
         .single()
       
       if (userError || !user) {
-        setError('المتطوب غير موجود في النظام')
+        setError('المتطوع غير موجود في النظام')
         return
       }
       
@@ -168,7 +168,7 @@ function ScanAttendanceBody() {
       return
     }
 
-    if (!confirm('هل أنت متأكد من إلغاء تحضير هذا المتطوب؟ سيتم حرمانه من الساعات والامتيازات.')) {
+    if (!confirm('هل أنت متأكد من إلغاء تحضير هذا المتطوع؟ سيتم حرمانه من الساعات والامتيازات.')) {
       return
     }
 
@@ -182,7 +182,7 @@ function ScanAttendanceBody() {
 
       if (error) throw error
 
-      setSuccess('تم إلغاء تحضير المتطوب بنجاح')
+      setSuccess('تم إلغاء تحضير المتطوع بنجاح')
       
       setTimeout(() => {
         startScanner()
@@ -238,7 +238,7 @@ function ScanAttendanceBody() {
               مسح باركود المتطوع
             </h2>
             <p className="mt-2 text-sm text-zinc-600">
-              امسح QR Code الخاص ببطاقة المتطوب لعرض بياناته وتقييم سلوكه
+              امسح QR Code الخاص ببطاقة المتطوع لعرض بياناته وتقييم سلوكه
             </p>
           </div>
 
@@ -427,7 +427,7 @@ function ScanAttendanceBody() {
                 <textarea
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
-                  placeholder="أضف ملاحظات حول سلوك المتطوب..."
+                  placeholder="أضف ملاحظات حول سلوك المتطوع..."
                   className="h-24 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-[#C9A84C] resize-none"
                 />
               </div>
@@ -447,7 +447,7 @@ function ScanAttendanceBody() {
                 disabled={loading}
                 className="h-12 w-full rounded-2xl border-2 border-red-500 bg-red-50 text-red-700 text-sm font-extrabold hover:bg-red-100 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                إلغاء تحضير المتطوب
+                إلغاء تحضير المتطوع
               </button>
             </div>
           </div>

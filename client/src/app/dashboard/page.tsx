@@ -68,6 +68,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (me.data?.level) {
       document.body.setAttribute('data-theme-level', String(me.data.level))
+      console.log('Theme applied for level:', me.data.level)
     }
   }, [me.data?.level])
 

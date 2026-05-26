@@ -203,7 +203,7 @@ export default function OrganizerEventAttendanceReportPage() {
   // Mutation to remove attendance
   const removeAttendanceMutation = useMutation({
     mutationFn: async (userId: string) => {
-      if (!confirm('هل أنت متأكد من إلغاء حضور هذا المتطوب؟')) {
+      if (!confirm('هل أنت متأكد من إلغاء حضور هذا المتطوع؟')) {
         throw new Error('تم الإلغاء')
       }
 

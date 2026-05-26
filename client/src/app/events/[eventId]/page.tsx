@@ -45,7 +45,7 @@ export default function EventDetailsPage() {
       if (!session) throw new Error('No session')
       const { data, error } = await supabase
         .from('registrations')
-        .select('event_id, created_at')
+        .select('event_id, created_at, withdrawn')
         .eq('user_id', session.user.id)
       if (error) throw error
       return data
@@ -72,7 +72,7 @@ export default function EventDetailsPage() {
     enabled: !!eventId
   })
 
-  const registered = (regs.data ?? []).some((r) => String(r.event_id) === String(eventId))
+  const registered = (regs.data ?? []).some((r) => String(r.event_id) === String(eventId) && !r.withdrawn)
   const isFull = !!availability.data?.isFull
   const event = ev.data
   const isClosed = event?.is_closed === true
@@ -81,6 +81,18 @@ export default function EventDetailsPage() {
     mutationFn: async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('No session')
+
+      // Check if user has withdrawn before
+      const { data: existingReg } = await supabase
+        .from('registrations')
+        .select('withdrawn')
+        .eq('user_id', session.user.id)
+        .eq('event_id', eventId)
+        .single()
+      
+      if (existingReg?.withdrawn) {
+        throw new Error('لقد انسحبت سابقاً من هذه الفعالية ولا يمكنك إعادة التسجيل')
+      }
 
       const { data: evData } = await supabase.from('events').select('*').eq('id', eventId).single()
       if (evData?.is_closed) throw new Error('Registration closed')
@@ -112,16 +124,17 @@ export default function EventDetailsPage() {
 
   const withdraw = useMutation({
     mutationFn: async () => {
-      if (!confirm('هل أنت متأكد من الانسحاب من هذه الفعالية؟')) {
+      if (!confirm('هل أنت متأكد من الانسحاب من هذه الفعالية؟ لن تتمكن من إعادة التسجيل.')) {
         throw new Error('تم الإلغاء')
       }
 
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('No session')
 
+      // Mark as withdrawn instead of deleting
       const { error } = await supabase
         .from('registrations')
-        .delete()
+        .update({ withdrawn: true })
         .eq('user_id', session.user.id)
         .eq('event_id', eventId)
 
@@ -287,7 +300,7 @@ export default function EventDetailsPage() {
                 <div className="mt-8 pt-8 border-t border-black/5 flex flex-wrap gap-3">
                   <div className="flex items-center gap-3 text-zinc-400">
                     <LucideMapPin size={18} />
-                    <span className="text-[10px] font-bold">مقر الفعالية: داخل الحرم الجامعي</span>
+                    <span className="text-[10px] font-bold">مقر الفعالية: {event?.location || 'داخل الحرم الجامعي'}</span>
                   </div>
                   <button
                     onClick={async () => {

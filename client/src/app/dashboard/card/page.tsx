@@ -75,17 +75,78 @@ export default function DigitalCardPage() {
   }
 
   const downloadCard = async () => {
-    if (!cardRef.current) return
+    if (!user) return
     
     try {
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 2,
-        backgroundColor: null,
-        logging: false
-      })
+      // Create a professional card image with all data
+      const canvas = document.createElement('canvas')
+      canvas.width = 800
+      canvas.height = 500
+      const ctx = canvas.getContext('2d')
+      if (!ctx) throw new Error('Canvas context error')
+
+      // Background gradient based on level
+      const gradient = ctx.createLinearGradient(0, 0, 800, 500)
+      if (level >= 7) {
+        gradient.addColorStop(0, '#C9A84C')
+        gradient.addColorStop(1, '#8B6914')
+      } else {
+        gradient.addColorStop(0, '#1a1a1a')
+        gradient.addColorStop(1, '#0a0a0a')
+      }
+      ctx.fillStyle = gradient
+      ctx.fillRect(0, 0, 800, 500)
+
+      // Border
+      ctx.strokeStyle = level >= 7 ? '#FFD700' : '#ffffff20'
+      ctx.lineWidth = 8
+      ctx.strokeRect(4, 4, 792, 492)
+
+      // Header
+      ctx.fillStyle = '#ffffff40'
+      ctx.font = 'bold 14px Arial'
+      ctx.fillText('Taif University', 40, 50)
+      ctx.fillStyle = '#C9A84C'
+      ctx.font = 'bold 32px Arial'
+      ctx.fillText('نادي التطوع', 40, 85)
+
+      // User info
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 24px Arial'
+      ctx.fillText(user.full_name || 'المتطوع', 40, 150)
+      ctx.fillStyle = '#ffffff80'
+      ctx.font = '16px Arial'
+      ctx.fillText(user.email || '', 40, 180)
+
+      // Stats
+      ctx.fillStyle = '#C9A84C'
+      ctx.font = 'bold 28px Arial'
+      ctx.fillText(`المستوى: ${level}`, 40, 250)
+      ctx.fillText(`النقاط: ${user.total_points || 0}`, 40, 290)
+      ctx.fillText(`الساعات: ${stats.data?.totalHours || 0}`, 40, 330)
+
+      // QR Code placeholder
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(550, 100, 200, 200)
+      ctx.strokeStyle = '#000000'
+      ctx.lineWidth = 2
+      ctx.strokeRect(550, 100, 200, 200)
       
+      // QR Code text
+      ctx.fillStyle = '#000000'
+      ctx.font = 'bold 14px Arial'
+      ctx.fillText('QR Code', 600, 200)
+      ctx.font = '12px Arial'
+      ctx.fillText(user.id.slice(0, 8) + '...', 600, 220)
+
+      // Footer
+      ctx.fillStyle = '#ffffff30'
+      ctx.font = '12px Arial'
+      ctx.fillText('TUVMS-2026 | بطاقة التطوع الرقمية', 40, 460)
+
+      // Download
       const link = document.createElement('a')
-      link.download = `tuvms-card-${user?.full_name || 'card'}.png`
+      link.download = `tuvms-card-${user.full_name || 'card'}.png`
       link.href = canvas.toDataURL('image/png')
       link.click()
     } catch (error) {
@@ -110,9 +171,9 @@ export default function DigitalCardPage() {
             className="group relative h-[500px] w-full [perspective:2000px] cursor-pointer"
             onClick={() => setIsFlipped(!isFlipped)}
           >
-            <div ref={cardRef} className={`relative h-full w-full rounded-[3rem] transition-all duration-700 [transform-style:preserve-3d] shadow-2xl shadow-black/20 ${isFlipped ? '[transform:rotateY(180deg)]' : ''} lg:group-hover:shadow-2xl`}>
+            <div ref={cardRef} className={`relative h-full w-full rounded-[3rem] transition-all duration-700 [transform-style:preserve-3d] shadow-2xl shadow-black/20 ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
               
-              <div className="absolute inset-0 h-full w-full [backface-visibility:hidden]">
+              <div className="absolute inset-0 h-full w-full [backface-visibility:hidden] [transform:rotateY(0deg)]">
                 <div className={`h-full w-full rounded-[3rem] p-8 text-white relative overflow-hidden flex flex-col ${level >= 7 ? 'bg-gradient-to-br from-[#C9A84C] to-[#8B6914]' : 'bg-zinc-900'} border-4 ${level >= 7 ? 'border-[#FFD700]' : 'border-white/5'}`}>
                   {level >= 10 && (
                     <div className="absolute inset-0 rounded-[3rem] overflow-hidden">

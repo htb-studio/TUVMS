@@ -22,6 +22,7 @@ type AdminEvent = {
   certificate_text?: string | null
   is_visible?: boolean
   is_closed?: boolean
+  location?: string | null
 }
 
 export default function GodAdminEventSettingsPage() {
@@ -165,6 +166,17 @@ export default function GodAdminEventSettingsPage() {
                       onBlur={(e) => update.mutate({ admin_tag: e.target.value })}
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-2 px-1">موقع الفعالية</label>
+                  <input
+                    className="w-full h-14 rounded-2xl border border-black/5 bg-zinc-50 px-4 text-sm font-bold focus:bg-white focus:border-[#C9A84C]/50 transition-all outline-none"
+                    placeholder="مثال: داخل الحرم الجامعي، قاعة المؤتمرات، مبنى إدارة الأعمال..."
+                    defaultValue={event.location || ''}
+                    onBlur={(e) => update.mutate({ location: e.target.value })}
+                  />
+                  <p className="mt-2 text-[10px] text-zinc-400 font-medium">حدد الموقع الدقيق للفعالية</p>
                 </div>
 
                 <div>
